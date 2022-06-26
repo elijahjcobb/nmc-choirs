@@ -3,6 +3,10 @@
 	color: var(--white);
 }
 
+.left:hover {
+	cursor: pointer;
+}
+
 .nav div, .nav {
 	display: flex;
 	align-items: center;
@@ -13,4 +17,13 @@
 .nav h1 {
 	font-size: 22px;
 	color: var(--white);
+}
+
+.btn {
+	transition: 125ms ease-in-out;
+}
+
+.btn:hover {
+	transform: scale(1.1) translateY(-2px);
+	cursor: pointer;
 }

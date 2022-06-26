@@ -59,8 +59,9 @@ function elementForType(type: string) {
 export default function Media({ file }: ViewProps) {
 	const Preview = elementForType(file.mimeType);
 	return <div>
-		<NavBar title={file.previewName} />
+		<NavBar />
 		<div className={styles.container}>
+			<h1>{file.previewName}</h1>
 			<Preview {...file} />
 		</div>
 	</div>
