@@ -1,6 +1,6 @@
 import type { GetServerSideProps } from "next";
 import { Dir, type DirProps } from "../components/dir";
-import { fetchFilesInDirectory } from "../data/drive";
+import { fetchFile, fetchFilesInDirectory } from "../data/drive";
 
 
 export default function Page(props: DirProps) {
@@ -8,10 +8,11 @@ export default function Page(props: DirProps) {
 }
 
 export const getServerSideProps: GetServerSideProps<DirProps> = async (context) => {
+	const id = context.query.id as string;
 	return {
 		props: {
-			directory: await fetchFilesInDirectory(),
-			name: "Home"
+			directory: await fetchFilesInDirectory(id),
+			name: (await fetchFile(id)).name
 		}
 	}
 }

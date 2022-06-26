@@ -1,0 +1,14 @@
+.img, .video, .audio, .pdf {
+	width: 100%;
+}
+
+.pdf {
+	border: none;
+	outline: none;
+	height: calc(100vh - 148px);
+}
+
+.container {
+	padding: 32px;
+	width: 100%;
+}
