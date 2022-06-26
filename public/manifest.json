@@ -1,6 +1,6 @@
 {
-    "theme_color": "#00755a",
-    "background_color": "#00755a",
+    "theme_color": "var(--nmc)",
+    "background_color": "var(--nmc)",
     "display": "minimal-ui",
     "scope": "/",
     "start_url": "/",

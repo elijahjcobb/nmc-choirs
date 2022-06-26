@@ -12,7 +12,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
       <meta name="description" content="description of your project" />
-      <meta name="theme-color" content="#00755a" />
+      <meta name="theme-color" content="var(--nmc)" />
       <link rel="manifest" href="/manifest.json" />
       <link rel="shortcut icon" href="/icon.png" />
       <link rel="apple-touch-icon" href="/icon.png"></link>
