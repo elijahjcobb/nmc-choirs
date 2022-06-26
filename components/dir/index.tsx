@@ -18,10 +18,10 @@ export function Dir({ directory, name }: DirProps) {
 		<div className={styles.listContainer}>
 			{directory.length === 0 && <span>{'You found an empty folder :)'}</span>}
 			<ul className={styles.list}>
-				{directory.map((file, i) => <>
+				{directory.map((file, i) => <div key={file.id}>
 					<Row index={i} file={file} key={file.id} />
-					{i < directory.length - 1 && <div key={'line' + i} className={styles.sep} />}
-				</>)}
+					{i < directory.length - 1 && <div className={styles.sep} />}
+				</div>)}
 			</ul>
 		</div>
 	</div>
