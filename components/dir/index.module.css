@@ -8,6 +8,7 @@
 .folderName {
 	padding: 48px 32px;
 	font-size: 32px;
+	color: var(--white);
 }
 
 .top {
@@ -16,9 +17,9 @@
 }
 
 .listContainer {
-	background: white;
+	background: var(--background);
 	z-index: 2;
-	color: black;
+	color: var(--foreground);
 	box-shadow: 0 0 10px rgba(0,0,0, 0.5);
 	border-top-right-radius: 32px;
 	border-top-left-radius: 32px;
@@ -37,7 +38,7 @@
 .sep {
 	height: 2px;
 	width: 100%;
-	background: #eee;
+	background: var(--hover);
 }
 
 @keyframes fadeIn {
@@ -58,7 +59,7 @@
 	display: flex;
 	align-items: center;
 	gap: 16px;
-	background: white;
+	background: var(--background);
 	transition: background 100ms ease-in-out;
 	opacity: 0;
 	transform: translateX(100%);
@@ -66,10 +67,8 @@
 	animation: fadeIn 400ms ease-in-out forwards;
 }
 
-
-
 .row:hover {
-	background: #eee;
+	background: var(--hover);
 	cursor: pointer;
 }
 

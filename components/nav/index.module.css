@@ -1,5 +1,6 @@
 .nav {
 	padding: 16px;
+	color: var(--white);
 }
 
 .nav div, .nav {
@@ -11,4 +12,5 @@
 
 .nav h1 {
 	font-size: 22px;
+	color: var(--white);
 }
