@@ -7,6 +7,7 @@
   --foreground: #000;
   --hover: #eee;
   --primary: var(--nmc);
+  --bp: 768px;
 }
 
 @media (prefers-color-scheme: dark) {
