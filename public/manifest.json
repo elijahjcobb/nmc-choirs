@@ -1,7 +1,7 @@
 {
     "theme_color": "var(--nmc)",
     "background_color": "var(--nmc)",
-    "display": "minimal-ui",
+    "display": "fullscreen",
     "scope": "/",
     "start_url": "/",
     "name": "NMC Music",
