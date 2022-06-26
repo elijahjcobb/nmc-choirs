@@ -1,5 +1,6 @@
 import { GetStaticProps, GetStaticPaths } from "next";
 import Media, { ViewProps } from "../../components/view";
+import { FALLBACK_MODE, REVALIDATE_TIME } from "../../data/constants";
 import { fetchAllFiles, fetchFile } from "../../data/drive";
 
 
@@ -14,7 +15,8 @@ export const getStaticProps: GetStaticProps<ViewProps> = async (context) => {
 	return {
 		props: {
 			file
-		}
+		},
+		revalidate: REVALIDATE_TIME
 	}
 }
 
@@ -22,6 +24,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 	const files = await fetchAllFiles();
 	return {
 		paths: files.map(id => ({ params: { id } })),
-		fallback: false
+		fallback: FALLBACK_MODE
 	}
 }
