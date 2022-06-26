@@ -24,7 +24,6 @@ function Audio(props: GoogleDriveFile) {
 }
 
 function PDF(props: GoogleDriveFile) {
-	console.log(props);
 	return <iframe
 		src={`https://drive.google.com/file/d/${props.id}/preview`}
 		frameBorder="0"

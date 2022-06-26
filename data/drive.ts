@@ -55,7 +55,6 @@ async function fetchFilesRecursive(filesIds: string[], folderId: string): Promis
 		if (file.mimeType !== FOLDER_MIME) filesIds.push(file.id);
 		else await fetchFilesRecursive(filesIds, file.id);
 	}
-	console.log(JSON.stringify({folderId, filesIds}))
 }
 
 export async function fetchAllDirectories(): Promise<string[]> {

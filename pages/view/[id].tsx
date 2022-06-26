@@ -20,7 +20,6 @@ export const getStaticProps: GetStaticProps<ViewProps> = async (context) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
 	const files = await fetchAllFiles();
-	console.log(files);
 	return {
 		paths: files.map(id => ({ params: { id } })),
 		fallback: false
