@@ -5,7 +5,7 @@ import { FaHome } from "react-icons/fa";
 import Link from "next/link";
 
 export function NavBar({ title = "NMC Music" }: { title?: string }) {
-	const fixedTitle = title.length > 18 ? title.slice(0, 18) + "..." : title;
+	const fixedTitle = title.length > 18 ? title.slice(0, 15) + "..." : title;
 	return <nav className={styles.nav}>
 		<div>
 			<Icon width={18} />

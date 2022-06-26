@@ -2,7 +2,6 @@ import { FOLDER_MIME, GoogleDriveFile } from '../../data/drive';
 import styles from './index.module.css';
 import { FaFolder, FaQuestion, FaFileImage, FaFileAudio, FaFilePdf, FaFileVideo } from 'react-icons/fa';
 import { IconType } from 'react-icons/lib';
-import { useRouter } from 'next/router';
 import Link from 'next/link';
 
 export interface RowProps {

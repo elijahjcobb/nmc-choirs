@@ -8,22 +8,9 @@ export interface RawGoogleDriveFile {
 	name: string;
 	mimeType: string;
 }
-
-export interface GoogleDriveFile {
-	kind: string;
-	id: string;
-	name: string;
-	mimeType: string;
+export interface GoogleDriveFile extends RawGoogleDriveFile {
 	previewName: string;
 	url: string;
-}
-
-export type GoogleDriveChild = GoogleDriveFile | GoogleDriveDirectory;
-
-export interface GoogleDriveDirectory {
-	name: string;
-	kind: 'dir';
-	children: GoogleDriveChild[];
 }
 
 function convertRawFile(file: RawGoogleDriveFile): GoogleDriveFile {
@@ -53,27 +40,34 @@ export async function fetchFilesInDirectory(folderId: string = FOLDER_ID): Promi
 	return fixedFiles.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function fetchDirectoryRecursive(folderId: string = FOLDER_ID, name: string = '/'): Promise<GoogleDriveDirectory> {
-	console.log({folderId})
+async function fetchDirectoriesRecursive(directories: string[], folderId: string): Promise<void> {
+	directories.push(folderId);
 	const files = await fetchFilesInDirectory(folderId);
-	console.log({files})
-	const children: GoogleDriveChild[] = [];
 	for (const file of files) {
-		if (file.mimeType === FOLDER_MIME) {
-			children.push(await fetchDirectoryRecursive(file.id, file.name));
-		} else {
-			children.push(file)
-		}
-	}
-	return {
-		name,
-		kind: 'dir',
-		children
+		if (file.mimeType !== FOLDER_MIME) continue;
+		await fetchDirectoriesRecursive(directories, file.id);
 	}
 }
 
-export async function fetchDirectoryTree(): Promise<GoogleDriveDirectory> {
-	return await fetchDirectoryRecursive();
+async function fetchFilesRecursive(filesIds: string[], folderId: string): Promise<void> {
+	const files = await fetchFilesInDirectory(folderId);
+	for (const file of files) {
+		if (file.mimeType !== FOLDER_MIME) filesIds.push(file.id);
+		else await fetchFilesRecursive(filesIds, file.id);
+	}
+	console.log(JSON.stringify({folderId, filesIds}))
+}
+
+export async function fetchAllDirectories(): Promise<string[]> {
+	const directories: string[] = [];
+	await fetchDirectoriesRecursive(directories, FOLDER_ID);
+	return directories;
+}
+
+export async function fetchAllFiles(): Promise<string[]> {
+	const files: string[] = [];
+	await fetchFilesRecursive(files, FOLDER_ID);
+	return files;
 }
 
 export function generateDownloadURLForFile(fileId: string): string {
