@@ -11,10 +11,12 @@ export default function Page(props: DirProps) {
 export const getStaticProps: GetStaticProps<DirProps> = async (context) => {
 	const id = context.params?.id as string | undefined;
 	if (!id) throw new Error("No id");
+	const file = await fetchFile(id);
+	const name = file ? file.name : "";
 	return {
 		props: {
 			directory: await fetchFilesInDirectory(id),
-			name: (await fetchFile(id)).name,
+			name,
 		},
 		revalidate: REVALIDATE_TIME
 	}

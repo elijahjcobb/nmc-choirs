@@ -1,7 +1,7 @@
 import { GetStaticProps, GetStaticPaths } from "next";
 import Media, { ViewProps } from "../../components/view";
 import { FALLBACK_MODE, REVALIDATE_TIME } from "../../data/constants";
-import { fetchAllFiles, fetchFile } from "../../data/drive";
+import { fetchAllFiles, fetchFile, GoogleDriveFile } from "../../data/drive";
 
 
 export default function Page(props: ViewProps) {
@@ -11,7 +11,7 @@ export default function Page(props: ViewProps) {
 export const getStaticProps: GetStaticProps<ViewProps> = async (context) => {
 	const id = context.params?.id as string | undefined;
 	if (!id) throw new Error("No id");
-	const file = await fetchFile(id);
+	const file = await fetchFile(id) as GoogleDriveFile;
 	return {
 		props: {
 			file
