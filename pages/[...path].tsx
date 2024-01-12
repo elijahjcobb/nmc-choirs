@@ -7,11 +7,12 @@ export default function Page(props: DirProps) {
 	return <Dir {...props} />
 }
 
-export const getServerSideProps: GetServerSideProps<DirProps> = async () => {
-	const items = await getItemForPath([]);
+export const getServerSideProps: GetServerSideProps<DirProps> = async (context) => {
+	const path = context.params?.path as string[];
+	const items = await getItemForPath(path);
 	return {
 		props: {
-			items,
+			items
 		},
 	}
 }

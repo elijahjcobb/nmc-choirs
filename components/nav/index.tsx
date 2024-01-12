@@ -1,7 +1,6 @@
 import { Icon } from "../icon";
 import styles from "./index.module.css";
 import { IoMdHelpCircle } from "react-icons/io";
-import { FaHome } from "react-icons/fa";
 import Link from "next/link";
 
 export function NavBar({ title = "NMC Music" }: { title?: string }) {
@@ -14,9 +13,6 @@ export function NavBar({ title = "NMC Music" }: { title?: string }) {
 			</div>
 		</Link>
 		<div>
-			<Link href='/'>
-				<FaHome className={styles.btn} size={32} />
-			</Link>
 			<Link href='/about'>
 				<IoMdHelpCircle className={styles.btn} size={32} />
 			</Link>

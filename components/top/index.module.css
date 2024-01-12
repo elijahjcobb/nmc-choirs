@@ -1,0 +1,28 @@
+.name {
+  padding: 48px 32px;
+  font-size: 18px;
+  color: var(--white);
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  overflow: hidden;
+  align-items: center;
+}
+
+.top {
+  position: sticky;
+  top: 0;
+}
+
+.crumb {
+  display: block;
+  color: white;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.crumb::before {
+  content: "/";
+  padding-right: 8px;
+  color: #555;
+}

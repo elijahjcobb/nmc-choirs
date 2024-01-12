@@ -1,2 +1,1 @@
-export const REVALIDATE_TIME = 3;
-export const FALLBACK_MODE = "blocking";
+export const API_URL = "http://104.131.0.240/nmcmusic" as const;

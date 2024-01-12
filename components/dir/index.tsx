@@ -1,26 +1,21 @@
-import { GoogleDriveFile } from "../../data/drive";
-import { NavBar } from "../nav";
+import type { APIItem } from "../../data/dir";
 import styles from './index.module.css';
 import { Row } from "./row";
+import { Top } from "../top";
 
 export interface DirProps {
-	directory: GoogleDriveFile[];
-	name: string;
+	items: APIItem[];
 }
 
-export function Dir({ directory, name }: DirProps) {
-
+export function Dir({ items }: DirProps) {
 	return <div className={styles.container}>
-		<div className={styles.top}>
-			<NavBar />
-			<h2 className={styles.folderName}>{name}</h2>
-		</div>
+		<Top />
 		<div className={styles.listContainer}>
-			{directory.length === 0 && <span>{'You found an empty folder :)'}</span>}
+			{items.length === 0 && <span>{'You found an empty folder :)'}</span>}
 			<ul className={styles.list}>
-				{directory.map((file, i) => <div key={file.id}>
-					<Row index={i} file={file} key={file.id} />
-					{i < directory.length - 1 && <div className={styles.sep} />}
+				{items.map((file, i) => <div key={file.name}>
+					<Row index={i} item={file} key={file.name} />
+					{i < items.length - 1 && <div className={styles.sep} />}
 				</div>)}
 			</ul>
 		</div>

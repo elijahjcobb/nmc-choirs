@@ -1,40 +1,53 @@
-import { FOLDER_MIME, GoogleDriveFile } from '../../data/drive';
 import styles from './index.module.css';
-import { FaFolder, FaQuestion, FaFileImage, FaFileAudio, FaFilePdf, FaFileVideo } from 'react-icons/fa';
+import { FaFolder, FaQuestion, FaFileImage, FaFileAudio, FaFilePdf, FaFileVideo, FaFileWord } from 'react-icons/fa';
 import { IconType } from 'react-icons/lib';
 import Link from 'next/link';
+import { useRouter } from 'next/router'
+import { useMemo } from 'react';
+import { APIItem } from '../../data/dir';
 
 export interface RowProps {
-	file: GoogleDriveFile;
+	item: APIItem;
 	index: number;
 }
 
-function iconForType(type: string): IconType {
-	switch (type) {
-		case FOLDER_MIME:
-			return FaFolder;
-		case 'image/jpeg':
-		case 'image/jpg':
-		case 'image/png':
+function iconForType(item: APIItem): IconType {
+	if (item.type === 'directory') return FaFolder;
+	const extension = item.name.split('.').pop();
+	switch (extension) {
+		case 'jpeg':
+		case 'jpg':
+		case 'png':
 			return FaFileImage;
-		case 'application/pdf':
+		case 'pdf':
 			return FaFilePdf;
-		case 'video/mp4':
+		case 'mp4':
 			return FaFileVideo;
-		case 'audio/mp3':
-		case 'audio/mpeg':
+		case 'mp3':
+		case 'aac':
+		case 'wav':
+		case 'mpeg':
 			return FaFileAudio;
+		case 'txt':
+			return FaFileWord;
 		default:
 			return FaQuestion;
 	}
 }
 
-export function Row({ file, index }: RowProps) {
-	const Icon = iconForType(file.mimeType);
-	return <Link href={`/${file.mimeType === FOLDER_MIME ? "" : "view/"}${file.id}`}>
+export function Row({ item, index }: RowProps) {
+	const Icon = iconForType(item);
+
+	const router = useRouter();
+
+	const href = useMemo(() => {
+		return `${item.type === 'file' ? "/view" : ""}${router.asPath}/${item.name}`
+	}, [item.name, item.type, router.asPath])
+
+	return <Link href={href}>
 		<li className={styles.row} style={{ animationDelay: index * 50 + "ms" }}>
 			<Icon size={32} className={styles.icon} />
-			<span className={styles.rowText}>{file.previewName}</span>
+			<span className={styles.rowText}>{item.name}</span>
 		</li>
 	</Link>
 }

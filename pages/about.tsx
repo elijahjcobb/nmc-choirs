@@ -7,8 +7,7 @@ export default function Page() {
 		<div className={styles.container}>
 			<h1>About</h1>
 			<p>{'Click the share button at the bottom of your screen and select "Add to Homescreen" to download this app.'}</p>
-			<p>Created by <a href='https://elijahcobb.com' target='_blank' rel="noreferrer">Elijah Cobb</a>.</p>
-			<p>Contact <a href="mailto:jecobb@nmc.edu">jecobb@nmc.edu</a> for any support/questions.</p>
+			<p>Contact <a href="mailto:jecobb@nmc.edu">jecobb@nmc.edu</a> for any support or questions.</p>
 		</div>
 	</div>
 }
