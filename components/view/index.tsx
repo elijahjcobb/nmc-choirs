@@ -1,6 +1,7 @@
 import styles from './index.module.css';
 import type { APIFile, File } from "../../data/dir";
 import { Top } from "../top";
+import { useMemo } from 'react';
 
 export interface ViewProps {
 	file: File;
@@ -18,9 +19,8 @@ function Video(props: File) {
 }
 
 function Audio(props: File) {
-	return <audio autoPlay controls className={styles.audio}>
-		<source src={props.url} type={`audio/${props.name.split(".").pop()}`} />
-	</audio>
+	const url = useMemo(() => encodeURI(props.url), [props.url]);
+	return <audio autoPlay controls src={url} className={styles.audio} />
 }
 
 function PDF(props: File) {

@@ -41,7 +41,7 @@ export function Row({ item, index }: RowProps) {
 	const router = useRouter();
 
 	const href = useMemo(() => {
-		return `${item.type === 'file' ? "/view" : ""}${router.asPath}/${item.name}`
+		return `${item.type === 'file' ? "/view" : ""}${router.asPath === "/" ? "" : router.asPath}/${item.name}`
 	}, [item.name, item.type, router.asPath])
 
 	return <Link href={href}>
