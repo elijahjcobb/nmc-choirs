@@ -1,1 +1,1 @@
-export const API_URL = "https://nmcmusic-api.elijahcobb.app/nmcmusic" as const;
+export const API_URL = "https://nmcmusic-api.elijahcobb.dev/nmcmusic" as const;
