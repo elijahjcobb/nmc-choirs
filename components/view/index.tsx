@@ -62,6 +62,9 @@ export default function Media({ file }: ViewProps) {
 		<Top />
 		<div className={styles.container}>
 			<h1>{file.name.split(".")[0]}</h1>
+			<div className={styles.buttons}>
+				<a className={styles.button} target='_blank' download href={file.url} rel="noreferrer">Download</a>
+			</div>
 			<Preview {...file} />
 		</div>
 	</div>

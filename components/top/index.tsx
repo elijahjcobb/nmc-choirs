@@ -13,7 +13,7 @@ export function Top(): JSX.Element {
 	const crumbs = useMemo(() =>
 		router.asPath.split('/').filter(p => p !== 'view').splice(1).map((s, i, a) => {
 			const name = decodeURIComponent(s);
-			return { name: truncate(name, { length: i == a.length - 1 ? 24 : 8 }), fullName: name, href: `/${a.slice(0, i + 1).join("/")}` };
+			return { name: truncate(name, { length: i == a.length - 1 ? 32 : 8 }), fullName: name, href: `/${a.slice(0, i + 1).join("/")}` };
 		})
 		, [router.asPath]);
 
