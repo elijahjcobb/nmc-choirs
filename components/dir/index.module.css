@@ -53,19 +53,6 @@
   background: var(--hover);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  30% {
-    opacity: 1;
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0%);
-  }
-}
-
 .row {
   padding: 16px;
   display: flex;
@@ -73,10 +60,6 @@
   gap: 16px;
   background: var(--background);
   transition: background 100ms ease-in-out;
-  opacity: 0;
-  transform: translateX(100%);
-  transform-origin: center;
-  animation: fadeIn 400ms ease-in-out forwards;
 }
 
 .row:hover {

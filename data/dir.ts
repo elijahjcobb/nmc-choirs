@@ -25,7 +25,20 @@ export type File = APIFile & { url: string };
 
 export async function getItemForPath(path: string[]): Promise<APIItem[]> {
   const url = `${API_URL}/${path.join("/")}`;
-  const res = await fetch(url);
-  const json = await res.json();
+  let res: Response;
+  try {
+    res = await fetch(url);
+  } catch (e) {
+    console.error(`Failed to load API request: ${e}`);
+    throw e;
+  }
+  let json: unknown;
+  try {
+    json = await res.json();
+  } catch (e) {
+    console.error(`Failed to parse json ${e}`);
+    throw e;
+  }
+
   return apiSchema.parse(json);
 }
