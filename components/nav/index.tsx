@@ -12,10 +12,5 @@ export function NavBar({ title = "NMC Music" }: { title?: string }) {
 				<h1>{fixedTitle}</h1>
 			</div>
 		</Link>
-		<div>
-			<Link href='/about'>
-				<IoMdHelpCircle className={styles.btn} size={32} />
-			</Link>
-		</div>
 	</nav>
 }

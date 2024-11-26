@@ -3,6 +3,10 @@ import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { Analytics } from '@vercel/analytics/react';
 import styles from "../styles/container.module.css";
+import { Poppins as Font } from "@next/font/google";
+import classnames from "classnames";
+
+const font = Font({ subsets: ['latin'], weight: ["200", "400", "800"] })
 
 function MyApp({ Component, pageProps }: AppProps) {
   return <>
@@ -21,7 +25,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     </Head>
-    <div className={styles.container}>
+    <div className={classnames(styles.container, font.className)}>
       <div className={styles.child}>
         <Component {...pageProps} />
       </div>

@@ -18,6 +18,7 @@ export function Top(): JSX.Element {
 		, [router.asPath]);
 
 	return <div className={styles.top}>
+		<div className={styles.fader} />
 		<NavBar />
 		<div className={styles.name}>
 			<Link href='/'>

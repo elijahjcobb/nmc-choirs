@@ -14,6 +14,7 @@
 .top {
   position: sticky;
   top: 0;
+  background: blue !important;
 }
 
 .crumb {
@@ -30,14 +31,11 @@
 
 .listContainer {
   background: var(--background);
-  z-index: 2;
   color: var(--foreground);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  border-top-right-radius: 32px;
-  border-top-left-radius: 32px;
+  border-radius: 32px;
   overflow: hidden;
   padding: 16px;
-  min-height: 90vh;
+  /* min-height: 90vh; */
 }
 
 .list {
