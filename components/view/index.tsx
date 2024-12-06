@@ -1,7 +1,7 @@
 import styles from './index.module.css';
 import type { APIFile, File } from "../../data/dir";
 import { Top } from "../top";
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 export interface ViewProps {
 	file: File;
@@ -18,9 +18,26 @@ function Video(props: File) {
 	</video>
 }
 
-function Audio(props: File) {
+const playbackSpeeds = ['0.5', '0.75', '1', '1.25', '1.5', '2'];
+function Audio(props: File): JSX.Element {
+
+	const [playbackSpeed, setPlaybackSpeed] = useState<string>('1');
+	const ref = useRef<HTMLAudioElement>(null);
+
+	useEffect(() => {
+		if (ref.current) {
+			ref.current.playbackRate = parseFloat(playbackSpeed);
+		}
+	}, [playbackSpeed]);
+
 	const url = useMemo(() => encodeURI(props.url), [props.url]);
-	return <audio autoPlay controls src={url} className={styles.audio} />
+	return <div>
+		<span>Playback Speed</span>
+		<div className={styles.playbackSpeeds}>
+			{playbackSpeeds.map(speed => <button className={speed === playbackSpeed ? styles.playbackSpeedActive : ""} key={speed} onClick={() => setPlaybackSpeed(speed)}>{speed}</button>)}
+		</div>
+		<audio ref={ref} autoPlay controls src={url} className={styles.audio} />
+	</div>
 }
 
 function PDF(props: File) {

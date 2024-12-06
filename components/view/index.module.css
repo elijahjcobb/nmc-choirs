@@ -25,16 +25,48 @@
   display: flex;
 }
 
+.button,
+.playbackSpeeds button {
+  font-weight: bold;
+  outline: none;
+  border: none;
+  transition: 125ms ease-in-out;
+}
+
 .button {
   background: var(--white);
   color: var(--primary);
-  font-size: 1rem;
   padding: 16px;
-  font-weight: bold;
   border-radius: 8px;
-  transition: 125ms ease-in-out;
+  font-size: 1rem;
 }
 
 .button:hover {
   transform: scale(1.05);
+}
+
+.playbackSpeeds {
+  display: flex;
+  width: 100%;
+  justify-content: stretch;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.playbackSpeeds button {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  color: var(--white);
+  background: var(--primary);
+  border: solid 2px var(--white);
+}
+
+.playbackSpeeds button:hover {
+  transform: scale(1.05);
+}
+
+.playbackSpeedActive {
+  background: var(--white) !important;
+  color: var(--primary) !important;
 }
