@@ -159,6 +159,86 @@
   color: var(--link-hover);
 }
 
+/* Markdown prose. Scoped to public content only. */
+.prose-nmc {
+  color: var(--ink);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+.prose-nmc > :first-child {
+  margin-top: 0;
+}
+.prose-nmc > :last-child {
+  margin-bottom: 0;
+}
+.prose-nmc h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 18px 0 10px;
+}
+.prose-nmc h2 {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 18px 0 10px;
+}
+.prose-nmc h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 16px 0 8px;
+}
+.prose-nmc p {
+  margin: 0 0 14px;
+  color: var(--subtle);
+  text-wrap: pretty;
+}
+.prose-nmc strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.prose-nmc ul,
+.prose-nmc ol {
+  margin: 0 0 14px;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--subtle);
+}
+.prose-nmc li {
+  line-height: 1.6;
+}
+.prose-nmc code {
+  background: var(--nav-hover);
+  border-radius: 5px;
+  padding: 1px 6px;
+  font-size: 0.9em;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+.prose-nmc pre {
+  background: var(--nav-hover);
+  border-radius: 12px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin: 0 0 14px;
+}
+.prose-nmc pre code {
+  background: none;
+  padding: 0;
+}
+.prose-nmc blockquote {
+  border-left: 3px solid var(--line-strong);
+  margin: 0 0 14px;
+  padding-left: 14px;
+  color: var(--subtle);
+}
+.prose-nmc hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 18px 0;
+}
+
 /* Material Symbols Rounded are vendored as inline SVG (components/site/icons.tsx),
    so no icon webfont is loaded and there is no FOUT. */
 
