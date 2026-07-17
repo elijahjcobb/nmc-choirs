@@ -2,8 +2,9 @@
 import { useSite } from "../site-context";
 import { Icon } from "../icons";
 import { visualFor } from "../visuals";
+import { playAudioFile } from "../player/play-file";
 import type { TreeNode } from "@/lib/tree-types";
-import { displayName, formatDate, formatSize, hrefForPath } from "@/lib/paths";
+import { displayName, formatDate, formatSize, hrefForPath, kindOf } from "@/lib/paths";
 
 export function metaFor(node: TreeNode): string {
   if (node.type === "folder") {
@@ -24,12 +25,22 @@ export function EntryRow({
   index?: number;
   subtitle?: string;
 }) {
-  const { navigate } = useSite();
+  const { tree, navigate } = useSite();
   const visual = visualFor(node);
+
+  const onOpen = () => {
+    // Start audio synchronously in the tap gesture so iOS unlocks the element
+    // (reliable autoplay + lock-screen auto-advance), then navigate.
+    if (node.type === "file" && kindOf(node.ext) === "audio") {
+      playAudioFile(tree, node, fullPath);
+    }
+    navigate(hrefForPath(fullPath));
+  };
+
   return (
     <button
       type="button"
-      onClick={() => navigate(hrefForPath(fullPath))}
+      onClick={onOpen}
       style={{ animationDelay: `${Math.min(index, 12) * 28}ms` }}
       className="flex animate-[nmc-row-in_0.28s_ease_both] items-center gap-[13px] rounded-[14px] border border-line bg-surface px-[15px] py-[13px] text-left transition-colors hover:border-brand"
     >

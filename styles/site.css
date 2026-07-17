@@ -144,11 +144,18 @@
   text-rendering: optimizeLegibility;
 }
 
+/* Anchors default to inheriting color so Tailwind text-* utilities win on links
+   styled as buttons. Content links (markdown/text) opt into the link color via
+   the `.prose-nmc` scope. */
 .site-root a {
-  color: var(--link);
+  color: inherit;
   text-decoration: none;
 }
-.site-root a:hover {
+.site-root .prose-nmc a {
+  color: var(--link);
+  font-weight: 600;
+}
+.site-root .prose-nmc a:hover {
   color: var(--link-hover);
 }
 

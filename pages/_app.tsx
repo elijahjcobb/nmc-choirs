@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import { Analytics } from "@vercel/analytics/react";
 import { Poppins, Space_Grotesk } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { MiniPlayer } from "@/components/site/player/mini-player";
 
 // Admin keeps Poppins byte-for-byte; the public site uses Space Grotesk.
 const poppins = Poppins({
@@ -87,6 +88,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           )}
         >
           <Component {...pageProps} />
+          <MiniPlayer />
         </div>
       )}
       <Analytics />

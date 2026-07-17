@@ -3,8 +3,10 @@
 // the user navigates, so playback survives route changes.
 import type { ReactNode } from "react";
 import { Sidebar } from "./sidebar";
+import { usePlayerState } from "@/lib/player/use-player";
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const { track } = usePlayerState();
   return (
     <div className="flex min-h-[100dvh]">
       <Sidebar />
@@ -14,6 +16,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         <footer className="px-4 pb-6 pt-5 text-center text-[11.5px] text-faint">
           NMC Music · Northwestern Michigan College
         </footer>
+        {/* Clearance for the fixed mini-player. */}
+        {track && (
+          <div
+            aria-hidden
+            style={{ height: "calc(68px + env(safe-area-inset-bottom))" }}
+          />
+        )}
       </div>
     </div>
   );
