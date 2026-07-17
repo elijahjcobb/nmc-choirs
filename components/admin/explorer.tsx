@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { toast } from "sonner";
 import { FolderPlus, Upload, LogOut, X } from "lucide-react";
@@ -44,6 +44,37 @@ export function AdminExplorer() {
   const [sidebarWidth, setSidebarWidth] = useState(256);
   const [dragging, setDragging] = useState<DragPayload | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  // Whether cwd has been seeded from the URL yet (guards the state->URL write).
+  const hydrated = useRef(false);
+
+  // The current folder lives in `?path=` so a refresh (and back/forward) keeps
+  // us where we are. Names never contain "/", so join/split is unambiguous.
+  const queryPath = router.query.path;
+
+  // URL -> cwd (initial load and browser back/forward).
+  useEffect(() => {
+    if (!router.isReady) return;
+    const raw = Array.isArray(queryPath) ? queryPath[0] : queryPath;
+    const next = raw ? raw.split("/").filter(Boolean) : [];
+    setCwd((cur) => (pathKey(cur) === pathKey(next) ? cur : next));
+    hydrated.current = true;
+  }, [router.isReady, queryPath]);
+
+  // cwd -> URL (folder navigation), shallow so getServerSideProps doesn't re-run.
+  useEffect(() => {
+    if (!hydrated.current) return;
+    const raw = Array.isArray(queryPath) ? queryPath[0] : queryPath;
+    const nextStr = cwd.join("/");
+    if ((raw ?? "") === nextStr) return;
+    router.replace(
+      { pathname: "/admin", query: nextStr ? { path: nextStr } : {} },
+      undefined,
+      { shallow: true },
+    );
+    // router intentionally omitted: it changes identity on each query update and
+    // would re-run this effect; the (raw === nextStr) guard already no-ops that.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cwd]);
 
   // Whether the currently-dragged entry may be dropped on `targetDir`. Invalid
   // targets (its current parent, itself, or a descendant) don't highlight and

@@ -11,8 +11,6 @@ import {
   FolderInput,
   Trash2,
   GripVertical,
-  ChevronUp,
-  ChevronDown,
 } from "lucide-react";
 import {
   ContextMenu,
@@ -155,15 +153,6 @@ export function FileList({
   const reorderable =
     dragging?.type === "file" && pathKey(parentOf(dragging.path)) === pathKey(cwd);
 
-  /** Persist the file order after swapping the row at `index` with its neighbor. */
-  function moveRow(index: number, delta: -1 | 1) {
-    const j = index + delta;
-    if (j < 0 || j >= files.length) return;
-    const names = files.map((r) => r.name);
-    [names[index], names[j]] = [names[j], names[index]];
-    onReorder(names);
-  }
-
   const folderMenu = (row: Row) => (
     <ContextMenuContent className="w-44">
       <ContextMenuItem onSelect={() => onOpenFolder(row.path)}>
@@ -279,7 +268,6 @@ export function FileList({
               <span className="flex-1">Name</span>
               <span className="w-24 text-right">Size</span>
               <span className="hidden w-28 text-right sm:inline">Modified</span>
-              <span className="w-14 shrink-0" />
             </div>
             {files.map((row, index) => (
               <ContextMenu key={pathKey(row.path)}>
@@ -336,34 +324,6 @@ export function FileList({
                     </span>
                     <span className="text-muted-foreground hidden w-28 shrink-0 text-right sm:inline">
                       {row.file ? formatDate(row.file.uploadedAt) : ""}
-                    </span>
-                    <span className="flex w-14 shrink-0 items-center justify-end">
-                      <button
-                        type="button"
-                        aria-label={`Move ${row.name} up`}
-                        disabled={index === 0}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          moveRow(index, -1);
-                        }}
-                        onDoubleClick={(e) => e.stopPropagation()}
-                        className="hover:bg-muted flex size-7 items-center justify-center rounded disabled:pointer-events-none disabled:opacity-30"
-                      >
-                        <ChevronUp className="size-4" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`Move ${row.name} down`}
-                        disabled={index === files.length - 1}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          moveRow(index, 1);
-                        }}
-                        onDoubleClick={(e) => e.stopPropagation()}
-                        className="hover:bg-muted flex size-7 items-center justify-center rounded disabled:pointer-events-none disabled:opacity-30"
-                      >
-                        <ChevronDown className="size-4" />
-                      </button>
                     </span>
                   </div>
                 </ContextMenuTrigger>
