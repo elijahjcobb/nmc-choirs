@@ -122,7 +122,7 @@ export function FileList({
   if (loading) {
     return (
       <div className="flex flex-col gap-6 p-6">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-28 w-full rounded-lg" />
           ))}
@@ -201,7 +201,7 @@ export function FileList({
           <h2 className="text-muted-foreground mb-3 text-xs font-medium tracking-wide uppercase">
             Folders
           </h2>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
             {folders.map((row) => {
               const key = pathKey(row.path);
               const isDropTarget = dragOver === key;
@@ -239,7 +239,7 @@ export function FileList({
                       )}
                     >
                       <Folder className="text-muted-foreground size-12" />
-                      <span className="w-full truncate text-sm font-medium">{row.name}</span>
+                      <span className="w-full text-sm font-medium break-words">{row.name}</span>
                     </div>
                   </ContextMenuTrigger>
                   {folderMenu(row)}
