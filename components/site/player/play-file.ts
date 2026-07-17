@@ -10,11 +10,12 @@ export function playAudioFile(
   tree: TreeAccess,
   node: TreeFileNode,
   path: string[],
+  opts?: { seekTo?: number },
 ): TrackRef {
   const parent = tree.getNode(path.slice(0, -1));
   const siblings = parent && parent.type === "folder" ? parent.children : [node];
   const queue = buildAudioQueue(siblings, path.slice(0, -1));
   const track = toTrackRef(node, path);
-  playTrack(track, { queue });
+  playTrack(track, { queue, seekTo: opts?.seekTo });
   return track;
 }

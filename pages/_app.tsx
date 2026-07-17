@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import { Analytics } from "@vercel/analytics/react";
 import { Poppins, Space_Grotesk } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { Toaster } from "sonner";
 import { MiniPlayer } from "@/components/site/player/mini-player";
 
 // Admin keeps Poppins byte-for-byte; the public site uses Space Grotesk.
@@ -89,6 +90,13 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         >
           <Component {...pageProps} />
           <MiniPlayer />
+          <Toaster
+            position="bottom-center"
+            offset={90}
+            toastOptions={{
+              className: cn(spaceGrotesk.className, "nmc-toast"),
+            }}
+          />
         </div>
       )}
       <Analytics />

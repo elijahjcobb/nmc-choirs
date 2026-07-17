@@ -1,12 +1,14 @@
 // File detail screen: header (icon tile + title + chips), Download / Open
 // original actions, and the type-specific viewer. The viewer + audio player are
 // wired in later steps; a placeholder renders until then.
+import { useState } from "react";
 import { useSite } from "../site-context";
 import { Breadcrumbs } from "../shell/breadcrumbs";
 import { Icon } from "../icons";
 import { visualFor } from "../visuals";
 import { Chips } from "./chips";
 import { FileViewer } from "./file-viewer";
+import { ShareMenu } from "../browse/share-menu";
 import type { TreeFileNode } from "@/lib/tree-types";
 import { displayName, formatDate, formatSize } from "@/lib/paths";
 
@@ -19,6 +21,7 @@ export function FilePage({
 }) {
   const { navigate } = useSite();
   const visual = visualFor(file);
+  const [shareOpen, setShareOpen] = useState(false);
   const parentPath = path.slice(0, -1);
   const context = ["Home", ...parentPath].join(" / ");
 
@@ -80,9 +83,20 @@ export function FilePage({
           <Icon name="open_in_new" size={19} />
           Open original
         </a>
+        <button
+          type="button"
+          onClick={() => setShareOpen(true)}
+          aria-label="Share"
+          className="flex items-center justify-center rounded-[13px] border-[1.5px] border-line-strong px-[18px] py-[13px] text-ink transition-colors hover:border-brand"
+        >
+          <Icon name="share" size={19} />
+        </button>
       </div>
 
       <FileViewer file={file} path={path} />
+      {shareOpen && (
+        <ShareMenu node={file} path={path} open={shareOpen} onOpenChange={setShareOpen} />
+      )}
     </div>
   );
 }
