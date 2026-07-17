@@ -6,7 +6,7 @@ import Link from "next/link";
 import styles from "./index.module.css";
 import { FaHome } from "react-icons/fa";
 
-export function Top(): JSX.Element {
+export function Top() {
 
 	const router = useRouter();
 

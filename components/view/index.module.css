@@ -18,7 +18,23 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
-  color: var(--background);
+  color: var(--site-background);
+}
+
+.text {
+  width: 100%;
+  background: var(--white);
+  color: var(--site-foreground);
+  padding: 24px;
+  border-radius: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: auto;
+  max-height: 70vh;
+  margin: 0;
 }
 
 .buttons {
@@ -35,7 +51,7 @@
 
 .button {
   background: var(--white);
-  color: var(--primary);
+  color: var(--site-primary);
   padding: 16px;
   border-radius: 8px;
   font-size: 1rem;
@@ -58,7 +74,7 @@
   font-size: 0.9rem;
   border-radius: 8px;
   color: var(--white);
-  background: var(--primary);
+  background: var(--site-primary);
   border: solid 2px var(--white);
 }
 
@@ -68,5 +84,5 @@
 
 .playbackSpeedActive {
   background: var(--white) !important;
-  color: var(--primary) !important;
+  color: var(--site-primary) !important;
 }

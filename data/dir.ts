@@ -1,44 +1,25 @@
-import { z } from "zod";
-import { API_URL } from "./constants";
+// Public data-layer facade. The file/folder tree is served from Vercel Blob
+// (see lib/blob.ts); these types and getItemForPath keep the same shape the
+// public pages and components have always consumed.
+import { listDir } from "../lib/blob";
 
-const baseSchema = z.object({
-  name: z.string(),
-  mtime: z.string(),
-});
+export interface APIFile {
+  name: string;
+  mtime: string;
+  type: "file";
+  size: number;
+}
 
-const fileSchema = baseSchema.extend({
-  type: z.literal("file"),
-  size: z.number(),
-});
+export interface APIDirectory {
+  name: string;
+  mtime: string;
+  type: "directory";
+}
 
-const directorySchema = baseSchema.extend({
-  type: z.literal("directory"),
-});
-
-const apiSchema = z.array(z.union([fileSchema, directorySchema]));
-
-export type APIFile = z.infer<typeof fileSchema>;
-export type APIDirectory = z.infer<typeof directorySchema>;
 export type APIItem = APIFile | APIDirectory;
 
-export type File = APIFile & { url: string };
+export type File = APIFile & { url: string; downloadUrl?: string };
 
 export async function getItemForPath(path: string[]): Promise<APIItem[]> {
-  const url = `${API_URL}/${path.join("/")}`;
-  let res: Response;
-  try {
-    res = await fetch(url);
-  } catch (e) {
-    console.error(`Failed to load API request: ${e}`);
-    throw e;
-  }
-  let json: unknown;
-  try {
-    json = await res.json();
-  } catch (e) {
-    console.error(`Failed to parse json ${e}`);
-    throw e;
-  }
-
-  return apiSchema.parse(json);
+  return listDir(path);
 }

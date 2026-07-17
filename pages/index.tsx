@@ -13,6 +13,6 @@ export const getStaticProps: GetStaticProps<DirProps> = async () => {
 		props: {
 			items,
 		},
-		revalidate: 60
+		revalidate: 300
 	}
 }

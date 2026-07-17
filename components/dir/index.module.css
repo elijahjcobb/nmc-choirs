@@ -30,8 +30,8 @@
 }
 
 .listContainer {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--site-background);
+  color: var(--site-foreground);
   border-radius: 32px;
   overflow: hidden;
   padding: 16px;
@@ -56,7 +56,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  background: var(--background);
+  background: var(--site-background);
   transition: background 100ms ease-in-out;
 }
 

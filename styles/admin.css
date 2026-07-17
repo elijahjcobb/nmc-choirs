@@ -1,0 +1,82 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * Pin `dark:` utilities to an explicit `.dark` ancestor (which the admin never
+ * renders) so the admin UI stays light regardless of the visitor's OS theme.
+ */
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * shadcn/ui "neutral" light palette. These live on :root (not a scoped class)
+ * because Radix portals (Dialog, ContextMenu, AlertDialog) mount on
+ * document.body, outside any admin wrapper — scoped vars would leave portal
+ * content unstyled. The public site never uses these tokens; it renames its own
+ * colliding vars to --site-* (see styles/globals.css).
+ */
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  /*
+   * NOTE: shadcn normally adds `body { @apply bg-background text-foreground }`
+   * here. It is deliberately omitted — the public <body> must keep its green
+   * (--site-primary) background. The admin page sets bg-background on its own
+   * root element instead.
+   */
+}
+
+/* Restore the normal line-height inside the admin (globals.css sets it to
+ * `normal` to protect the public site from preflight). */
+.admin-root {
+  line-height: 1.5;
+}
