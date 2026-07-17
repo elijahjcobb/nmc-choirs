@@ -1,47 +1,95 @@
-import '../styles/globals.css'
-import '../styles/admin.css'
-import type { AppProps } from 'next/app'
-import Head from 'next/head'
-import { useRouter } from 'next/router'
-import { Analytics } from '@vercel/analytics/react';
-import styles from "../styles/container.module.css";
-import { Poppins as Font } from "next/font/google";
-import classnames from "classnames";
+// Site-first import order: the public entry loads first, the admin entry last so
+// admin keeps its "last stylesheet wins" position exactly as before. The two
+// Tailwind entries share no token names and admin's `dark:` variant stays pinned
+// to `.dark` (never rendered), so system dark mode can't touch the admin UI.
+import "../styles/site.css";
+import "../styles/admin.css";
 
-const font = Font({ subsets: ['latin'], weight: ["200", "400", "500", "600", "700", "800"] })
+import type { AppProps } from "next/app";
+import Head from "next/head";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { Analytics } from "@vercel/analytics/react";
+import { Poppins, Space_Grotesk } from "next/font/google";
+import { cn } from "@/lib/utils";
 
-function MyApp({ Component, pageProps }: AppProps) {
+// Admin keeps Poppins byte-for-byte; the public site uses Space Grotesk.
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["200", "400", "500", "600", "700", "800"],
+});
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-site",
+});
+
+export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const isAdmin = router.pathname.startsWith('/admin');
-  return <>
-    <Head>
-      <title>NMC Music</title>
-      <link rel="icon" href="/icon-16.png" sizes='16x16' />
-      <link rel="icon" href="/icon-32.png" sizes='32x32' />
-      <meta charSet="utf-8" />
-      <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-      <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-      <meta name="description" content="description of your project" />
-      <meta name="theme-color" content="var(--nmc)" />
-      <link rel="manifest" href="/manifest.json" />
-      <link rel="shortcut icon" href="/icon.png" />
-      <link rel="apple-touch-icon" href="/icon.png"></link>
-      <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    </Head>
-    {isAdmin ? (
-      <div className={classnames(font.className, "admin-root")}>
-        <Component {...pageProps} />
-      </div>
-    ) : (
-      <div className={classnames(styles.container, font.className, "site-root")}>
-        <div className={styles.child}>
+  const isAdmin = router.pathname.startsWith("/admin");
+
+  // The old PWA shipped a workbox service worker that is now gone. Devices that
+  // installed it still have it serving stale caches — proactively unregister.
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .getRegistrations?.()
+        .then((regs) => regs.forEach((r) => r.unregister()))
+        .catch(() => {});
+    }
+  }, []);
+
+  return (
+    <>
+      <Head>
+        <title>NMC Music</title>
+        <meta charSet="utf-8" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: light)"
+          content="#f2f5f2"
+        />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: dark)"
+          content="#0d1210"
+        />
+        <meta
+          name="description"
+          content="Scores, rehearsal tracks, and notes for the NMC Music Department choirs."
+        />
+        <link rel="icon" href="/icon-16.png" sizes="16x16" />
+        <link rel="icon" href="/icon-32.png" sizes="32x32" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+        <meta name="apple-mobile-web-app-title" content="NMC Music" />
+      </Head>
+      {isAdmin ? (
+        <div className={cn(poppins.className, "admin-root")}>
           <Component {...pageProps} />
         </div>
-      </div>
-    )}
-    <Analytics />
-  </>
+      ) : (
+        <div
+          className={cn(
+            spaceGrotesk.variable,
+            spaceGrotesk.className,
+            "site-root",
+          )}
+        >
+          <Component {...pageProps} />
+        </div>
+      )}
+      <Analytics />
+    </>
+  );
 }
-
-export default MyApp

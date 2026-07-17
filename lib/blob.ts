@@ -13,8 +13,24 @@ import {
   BlobNotFoundError,
   type ListBlobResultBlob,
 } from "@vercel/blob";
-import type { APIFile, APIItem } from "../data/dir";
 import { compareItems, BLOB_ROOT } from "./files";
+
+// Listing shapes for the admin/data layer. (The public site uses the richer
+// nested LibraryIndex from lib/tree-types.ts instead.)
+export interface APIFile {
+  name: string;
+  mtime: string;
+  type: "file";
+  size: number;
+}
+
+export interface APIDirectory {
+  name: string;
+  mtime: string;
+  type: "directory";
+}
+
+export type APIItem = APIFile | APIDirectory;
 
 export const ROOT = BLOB_ROOT;
 export const KEEP = ".keep";

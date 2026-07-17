@@ -1,0 +1,198 @@
+/*
+ * PUBLIC SITE Tailwind entry. Kept rigorously isolated from the admin entry
+ * (styles/admin.css) by three locks so it can never alter the admin UI:
+ *
+ *  Lock 1 — `source(none)` + explicit @source: this entry only ever compiles
+ *           classes found in PUBLIC source dirs, so it can never re-emit admin's
+ *           shadcn `dark:` utilities under a prefers-color-scheme variant.
+ *  Lock 2 — the same `.dark`-pinned dark variant admin uses (belt & suspenders):
+ *           any stray `dark:` class here compiles to the same inert form.
+ *  Lock 3 — public theming NEVER uses the `dark:` variant. Light/dark is a pure
+ *           token flip via @media below, so no dark utility rules are emitted at
+ *           all. Every public color token name is disjoint from admin's tokens.
+ */
+@import "tailwindcss" source(none);
+@import "tw-animate-css";
+
+@source "../components/site";
+@source "../hooks";
+@source "../pages/_app.tsx";
+@source "../pages/[[...path]].tsx";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Raw color values. Names are deliberately unlike admin's (--background,
+ * --primary, --border, --muted, --accent, …) so the two :root blocks never
+ * clash. Dark mode is the system preference — no toggle, no `.dark` class.
+ */
+:root {
+  color-scheme: light dark;
+
+  --canvas: #f2f5f2;
+  --surface: #ffffff;
+  --sidebar: #ffffff;
+  --field: #f2f5f2;
+  --nav-active: #e7f0e9;
+  --nav-hover: #eef3ee;
+  --line: #dde5de;
+  --line-strong: #c8d4ca;
+  --ink: #14201a;
+  --subtle: #68776d;
+  --faint: #93a398;
+  --brand: #0e6537;
+  --brand-strong: #0a4f2b;
+  --brand-ink: #ffffff;
+  --link: #0e6537;
+  --link-hover: #0a4f2b;
+
+  --tile-audio-fg: #0e6537;
+  --tile-audio-bg: #e3efe6;
+  --tile-pdf-fg: #a16207;
+  --tile-pdf-bg: #f6ecd6;
+  --tile-txt-fg: #5b6b62;
+  --tile-txt-bg: #e8ece8;
+  --tile-md-fg: #2f6f92;
+  --tile-md-bg: #e2eef5;
+
+  /* Fixed regardless of theme (audio artwork tile). */
+  --art: #123c26;
+
+  --toast-bg: #14201a;
+  --toast-ink: #f2f5f2;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #0d1210;
+    --surface: #161e19;
+    --sidebar: #111814;
+    --field: #1b2620;
+    --nav-active: #16241c;
+    --nav-hover: #16241c;
+    --line: #24302a;
+    --line-strong: #2b3a31;
+    --ink: #eef4ef;
+    --subtle: #7e8f85;
+    --faint: #556458;
+    --brand: #3fae76;
+    --brand-strong: #6fd4a4;
+    --brand-ink: #06130c;
+    --link: #4cc088;
+    --link-hover: #6fd4a4;
+
+    --tile-audio-fg: #4cc088;
+    --tile-audio-bg: #1d2b22;
+    --tile-pdf-fg: #d4ab4a;
+    --tile-pdf-bg: #2f2a1c;
+    --tile-txt-fg: #93a398;
+    --tile-txt-bg: #232b26;
+    --tile-md-fg: #6fb1d3;
+    --tile-md-bg: #1a2730;
+
+    --toast-bg: #eef4ef;
+    --toast-ink: #14201a;
+  }
+}
+
+/*
+ * Map public tokens to Tailwind color utilities (bg-canvas, text-ink,
+ * border-line, text-brand, bg-tile-audio-bg, …). `inline` keeps the var
+ * reference in the emitted utility so the @media flip above re-themes live.
+ * None of these --color-* names collide with admin's set.
+ */
+@theme inline {
+  --font-sans: var(--font-site), ui-sans-serif, system-ui, sans-serif;
+
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-sidebar: var(--sidebar);
+  --color-field: var(--field);
+  --color-nav-active: var(--nav-active);
+  --color-nav-hover: var(--nav-hover);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-subtle: var(--subtle);
+  --color-faint: var(--faint);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-ink: var(--brand-ink);
+  --color-link: var(--link);
+  --color-link-hover: var(--link-hover);
+
+  --color-tile-audio-fg: var(--tile-audio-fg);
+  --color-tile-audio-bg: var(--tile-audio-bg);
+  --color-tile-pdf-fg: var(--tile-pdf-fg);
+  --color-tile-pdf-bg: var(--tile-pdf-bg);
+  --color-tile-txt-fg: var(--tile-txt-fg);
+  --color-tile-txt-bg: var(--tile-txt-bg);
+  --color-tile-md-fg: var(--tile-md-fg);
+  --color-tile-md-bg: var(--tile-md-bg);
+}
+
+/*
+ * Public site root. Scoped to `.site-root` so nothing here can bleed into the
+ * admin subtree (which is a sibling wrapper, `.admin-root`).
+ */
+.site-root {
+  min-height: 100dvh;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-site), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.site-root a {
+  color: var(--link);
+  text-decoration: none;
+}
+.site-root a:hover {
+  color: var(--link-hover);
+}
+
+/* Material Symbols Rounded are vendored as inline SVG (components/site/icons.tsx),
+   so no icon webfont is loaded and there is no FOUT. */
+
+@keyframes nmc-eq {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes nmc-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes nmc-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-root *,
+  .site-root *::before,
+  .site-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
