@@ -36,7 +36,7 @@ export interface TreeAccess {
   getNode: (path: string[]) => TreeNode | null;
   isLoading: boolean;
   error: unknown;
-  refresh: () => void;
+  refresh: () => Promise<unknown>;
 }
 
 function buildEntries(index: LibraryIndex): {
@@ -93,9 +93,7 @@ export function useTree(fallback: LibraryIndex): TreeAccess {
     getNode,
     isLoading,
     error,
-    refresh: () => {
-      void mutate();
-    },
+    refresh: () => mutate(),
   };
 }
 
