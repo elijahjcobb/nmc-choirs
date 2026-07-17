@@ -15,4 +15,9 @@ export interface TreeResponse {
   files: TreeFile[];
   /** Every folder in the store, each as an array of path segments. */
   folders: string[][];
+  /**
+   * Manual file order per directory, keyed by path segments joined with "/"
+   * (root = ""). Directories without an `.order.json` are simply absent.
+   */
+  orders: Record<string, string[]>;
 }

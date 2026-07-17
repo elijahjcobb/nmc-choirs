@@ -26,6 +26,9 @@ export const moveEntry = (from: string[], to: string[], type: EntryType) =>
 export const deleteEntry = (path: string[], type: EntryType) =>
   post("/api/admin/delete", { path, type });
 
+export const saveOrder = (dir: string[], names: string[]) =>
+  post("/api/admin/order", { dir, names });
+
 /** Best-effort revalidation of a public route; never throws. */
 export async function revalidatePath(path: string[]): Promise<void> {
   try {

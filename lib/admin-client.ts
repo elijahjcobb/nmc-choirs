@@ -1,6 +1,6 @@
 // Client-side helpers for the admin explorer.
 import type { TreeResponse, TreeFile, EntryType } from "./admin-types";
-import { compareItems, extensionOf } from "./files";
+import { compareItems, sortFilesWithOrder, extensionOf } from "./files";
 
 export const DRAG_TYPE = "application/x-nmc-entry";
 
@@ -32,17 +32,23 @@ function isChildOf(path: string[], parent: string[]): boolean {
   );
 }
 
-/** Immediate folder + file rows of a directory, directories first. */
+/**
+ * Immediate folder + file rows of a directory: folders first (alphabetical),
+ * then files in the directory's saved manual order (see sortFilesWithOrder).
+ */
 export function directoryContents(tree: TreeResponse, cwd: string[]): Row[] {
-  const rows: Row[] = [];
+  const folderRows: Row[] = [];
   for (const folder of tree.folders) {
     if (isChildOf(folder, cwd)) {
-      rows.push({ type: "directory", name: folder[folder.length - 1], path: folder });
+      folderRows.push({ type: "directory", name: folder[folder.length - 1], path: folder });
     }
   }
+  folderRows.sort(compareItems);
+
+  const fileRows: Row[] = [];
   for (const file of tree.files) {
     if (isChildOf(file.path, cwd)) {
-      rows.push({
+      fileRows.push({
         type: "file",
         name: file.path[file.path.length - 1],
         path: file.path,
@@ -50,8 +56,8 @@ export function directoryContents(tree: TreeResponse, cwd: string[]): Row[] {
       });
     }
   }
-  rows.sort(compareItems);
-  return rows;
+
+  return [...folderRows, ...sortFilesWithOrder(fileRows, tree.orders[pathKey(cwd)] ?? null)];
 }
 
 /** Direct child folders of a directory, sorted by name. */
