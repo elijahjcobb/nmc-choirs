@@ -1,23 +1,9 @@
-// Folder ordering contract — the SINGLE choke point for admin-defined ordering.
-//
-// A parallel effort is adding the ability for the admin to set a manual order per
-// folder. Until that storage format lands, `getFolderOrder` returns null and the
-// public site falls back to natural sort (directories first). When it lands, only
-// `getFolderOrder`'s body needs to read the admin's stored order — the entire
-// public app already consumes children in server order and never re-sorts.
+// Applies admin-defined folder ordering. The order itself comes from each
+// folder's `.order.json` manifest (an array of child names), read by the tree
+// builder; this module only turns that array into a stable child sort. The
+// client is order-blind — it never re-sorts what the server delivers.
 import { compareItems } from "./files";
 import type { TreeNode } from "./tree-types";
-
-/**
- * Admin-defined child order (array of child names) for a folder, or null when no
- * explicit order exists. Server-only in practice (called from the tree builder).
- */
-export async function getFolderOrder(
-  _path: string[],
-): Promise<string[] | null> {
-  // TODO: read the admin ordering manifest once that feature lands.
-  return null;
-}
 
 function compareNodes(a: TreeNode, b: TreeNode): number {
   return compareItems(

@@ -34,6 +34,8 @@ export type APIItem = APIFile | APIDirectory;
 
 export const ROOT = BLOB_ROOT;
 export const KEEP = ".keep";
+/** Per-folder admin ordering manifest: a JSON array of child names, in order. */
+export const ORDER_FILE = ".order.json";
 // Blob rejects empty bodies ("body is required"), so the placeholder is 1 byte.
 const KEEP_BODY = "\n";
 const CACHE_MAX_AGE = 3600;
