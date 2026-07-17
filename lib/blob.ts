@@ -14,10 +14,17 @@ import {
   type ListBlobResultBlob,
 } from "@vercel/blob";
 import type { APIFile, APIItem } from "../data/dir";
-import { compareItems, BLOB_ROOT } from "./files";
+import {
+  compareItems,
+  isHiddenName,
+  parseOrderJson,
+  sortFilesWithOrder,
+  BLOB_ROOT,
+} from "./files";
 
 export const ROOT = BLOB_ROOT;
 export const KEEP = ".keep";
+export const ORDER = ".order.json";
 // Blob rejects empty bodies ("body is required"), so the placeholder is 1 byte.
 const KEEP_BODY = "\n";
 const CACHE_MAX_AGE = 3600;
@@ -42,15 +49,21 @@ export async function listDir(path: string[]): Promise<APIItem[]> {
   const prefix = dirPrefix(path);
   const blobs = await listSubtree(prefix);
   const files: APIFile[] = [];
-  // immediate subfolder name -> whether it has any real (non-.keep) descendant
+  // immediate subfolder name -> whether it has any real (non-hidden) descendant
   const folderHasContent = new Map<string, boolean>();
+  // This directory's own `.order.json`, if present in the same list() pass.
+  let orderBlob: { url: string; uploadedAt: Date } | null = null;
 
   for (const blob of blobs) {
     const rel = blob.pathname.slice(prefix.length);
     if (rel.length === 0) continue;
     const slash = rel.indexOf("/");
     if (slash === -1) {
-      if (rel === KEEP) continue; // this directory's own placeholder
+      if (isHiddenName(rel)) {
+        // hidden metadata (.keep, .order.json) — never a listed file
+        if (rel === ORDER) orderBlob = blob;
+        continue;
+      }
       files.push({
         type: "file",
         name: rel,
@@ -59,17 +72,38 @@ export async function listDir(path: string[]): Promise<APIItem[]> {
       });
     } else {
       const folderName = rel.slice(0, slash);
-      const isReal = rel.slice(rel.lastIndexOf("/") + 1) !== KEEP;
+      const isReal = !isHiddenName(rel.slice(rel.lastIndexOf("/") + 1));
       folderHasContent.set(folderName, (folderHasContent.get(folderName) ?? false) || isReal);
     }
   }
 
-  const items: APIItem[] = [...files];
+  const order = orderBlob ? await fetchOrder(orderBlob) : null;
+
+  const folders: APIItem[] = [];
   for (const [name, hasContent] of folderHasContent) {
-    if (hasContent) items.push({ type: "directory", name, mtime: "" });
+    if (hasContent) folders.push({ type: "directory", name, mtime: "" });
   }
-  items.sort(compareItems);
-  return items;
+  folders.sort(compareItems);
+
+  return [...folders, ...sortFilesWithOrder(files, order)];
+}
+
+/**
+ * Fetch and parse an `.order.json` blob's content. Cache-busts the CDN with the
+ * blob's `uploadedAt` so the 60s `cacheControlMaxAge` never serves a stale body.
+ * Null on any failure — the merge rule tolerates a missing/invalid order.
+ */
+export async function fetchOrder(blob: {
+  url: string;
+  uploadedAt: Date;
+}): Promise<string[] | null> {
+  try {
+    const res = await fetch(`${blob.url}?v=${blob.uploadedAt.getTime()}`);
+    if (!res.ok) return null;
+    return parseOrderJson(await res.text());
+  } catch {
+    return null;
+  }
 }
 
 export type ResolvedFile = APIFile & { url: string; downloadUrl: string };
@@ -77,6 +111,7 @@ export type ResolvedFile = APIFile & { url: string; downloadUrl: string };
 /** Resolve a single file blob, or null if it does not exist. */
 export async function getFile(path: string[]): Promise<ResolvedFile | null> {
   if (path.length === 0) return null;
+  if (isHiddenName(path[path.length - 1])) return null; // never serve .keep/.order.json
   try {
     const h = await head(filePathname(path));
     return {
@@ -129,6 +164,49 @@ export async function mkdir(path: string[]): Promise<void> {
     addRandomSuffix: false,
     allowOverwrite: true,
   });
+}
+
+/** Persist a directory's manual file order to its hidden `.order.json` blob. */
+export async function writeOrder(dir: string[], names: string[]): Promise<void> {
+  await put(dirPrefix(dir) + ORDER, JSON.stringify(names), {
+    access: "public",
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    // 60s is Blob's minimum; reads cache-bust via uploadedAt (see fetchOrder).
+    cacheControlMaxAge: 60,
+  });
+}
+
+/** Read a directory's current order, or null if absent/invalid. */
+async function readOrder(dir: string[]): Promise<string[] | null> {
+  try {
+    const h = await head(dirPrefix(dir) + ORDER); // head metadata is not CDN-cached
+    return fetchOrder(h);
+  } catch (e) {
+    if (e instanceof BlobNotFoundError) return null;
+    throw e;
+  }
+}
+
+/**
+ * Best-effort: keep a renamed file's slot in its directory's order. Never
+ * throws — order is advisory and the merge rule self-heals a stale entry.
+ */
+export async function renameInOrder(
+  dir: string[],
+  oldName: string,
+  newName: string,
+): Promise<void> {
+  try {
+    const order = await readOrder(dir);
+    if (!order) return;
+    const idx = order.indexOf(oldName);
+    if (idx === -1) return;
+    order[idx] = newName;
+    await writeOrder(dir, order);
+  } catch {
+    /* best-effort; ignore */
+  }
 }
 
 /**

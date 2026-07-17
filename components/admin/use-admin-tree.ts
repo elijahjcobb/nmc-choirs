@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type { TreeResponse } from "@/lib/admin-types";
+import { pathKey } from "@/lib/admin-client";
 
-const EMPTY: TreeResponse = { files: [], folders: [] };
+const EMPTY: TreeResponse = { files: [], folders: [], orders: {} };
 
 export function useAdminTree() {
   const [tree, setTree] = useState<TreeResponse>(EMPTY);
@@ -21,9 +22,17 @@ export function useAdminTree() {
     }
   }, []);
 
+  /** Optimistically set a directory's file order; rolled back by refresh() on save failure. */
+  const setOrder = useCallback((dir: string[], names: string[]) => {
+    setTree((prev) => ({
+      ...prev,
+      orders: { ...prev.orders, [pathKey(dir)]: names },
+    }));
+  }, []);
+
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  return { tree, loading, error, refresh };
+  return { tree, loading, error, refresh, setOrder };
 }

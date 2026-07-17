@@ -10,6 +10,9 @@ import {
   Pencil,
   FolderInput,
   Trash2,
+  GripVertical,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import {
   ContextMenu,
@@ -27,6 +30,7 @@ import {
   formatSize,
   formatDate,
   pathKey,
+  parentOf,
   type Row,
   type DragPayload,
 } from "@/lib/admin-client";
@@ -34,6 +38,12 @@ import {
 interface Props {
   rows: Row[];
   loading: boolean;
+  /** Current directory — a reorder drag/arrow is only valid within it. */
+  cwd: string[];
+  /** The entry currently being dragged (from explorer state), or null. */
+  dragging: DragPayload | null;
+  /** Persist a new full file order (leaf names) for the current directory. */
+  onReorder: (names: string[]) => void;
   onOpenFolder: (path: string[]) => void;
   onDropEntry: (payload: DragPayload, targetDir: string[]) => void;
   canDrop: (targetDir: string[]) => boolean;
@@ -65,6 +75,9 @@ function startDrag(
 export function FileList({
   rows,
   loading,
+  cwd,
+  dragging,
+  onReorder,
   onOpenFolder,
   onDropEntry,
   canDrop,
@@ -74,6 +87,8 @@ export function FileList({
   onDelete,
 }: Props) {
   const [dragOver, setDragOver] = useState<string | null>(null);
+  // Insertion index (0..files.length) while dragging a file to reorder it.
+  const [dropIndex, setDropIndex] = useState<number | null>(null);
   // Single click opens the context menu (via a synthetic contextmenu event);
   // double click opens the item. A short timer disambiguates the two.
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -133,6 +148,21 @@ export function FileList({
 
   const folders = rows.filter((r) => r.type === "directory");
   const files = rows.filter((r) => r.type === "file");
+
+  // A file within the current directory can be reordered among its siblings.
+  // Read from `dragging` (not dataTransfer): getData is forbidden during
+  // dragover, and sidebar-tree directory drags must never trigger a reorder.
+  const reorderable =
+    dragging?.type === "file" && pathKey(parentOf(dragging.path)) === pathKey(cwd);
+
+  /** Persist the file order after swapping the row at `index` with its neighbor. */
+  function moveRow(index: number, delta: -1 | 1) {
+    const j = index + delta;
+    if (j < 0 || j >= files.length) return;
+    const names = files.map((r) => r.name);
+    [names[index], names[j]] = [names[j], names[index]];
+    onReorder(names);
+  }
 
   const folderMenu = (row: Row) => (
     <ContextMenuContent className="w-44">
@@ -236,23 +266,69 @@ export function FileList({
           <h2 className="text-muted-foreground mb-3 text-xs font-medium tracking-wide uppercase">
             Files
           </h2>
-          <div className="overflow-hidden rounded-md border">
+          <div
+            className="overflow-hidden rounded-md border"
+            onDragLeave={(e) => {
+              // Clear the indicator only when the pointer truly leaves the table,
+              // not on the flicker between adjacent rows.
+              if (!e.currentTarget.contains(e.relatedTarget as Node)) setDropIndex(null);
+            }}
+          >
             <div className="text-muted-foreground bg-muted/50 flex items-center gap-3 border-b px-3 py-2 text-xs font-medium">
+              <span className="w-4 shrink-0" />
               <span className="flex-1">Name</span>
               <span className="w-24 text-right">Size</span>
               <span className="hidden w-28 text-right sm:inline">Modified</span>
+              <span className="w-14 shrink-0" />
             </div>
-            {files.map((row) => (
+            {files.map((row, index) => (
               <ContextMenu key={pathKey(row.path)}>
                 <ContextMenuTrigger asChild>
                   <div
                     draggable
                     onDragStart={(e) => startDrag(e, row, onDragStateChange)}
-                    onDragEnd={() => onDragStateChange(null)}
+                    onDragEnd={() => {
+                      setDropIndex(null);
+                      onDragStateChange(null);
+                    }}
+                    onDragOver={(e) => {
+                      if (!e.dataTransfer.types.includes(DRAG_TYPE) || !reorderable) return;
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = "move";
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setDropIndex(e.clientY < rect.top + rect.height / 2 ? index : index + 1);
+                    }}
+                    onDrop={(e) => {
+                      if (!reorderable || dropIndex === null) {
+                        setDropIndex(null);
+                        return;
+                      }
+                      e.preventDefault();
+                      const target = dropIndex;
+                      setDropIndex(null);
+                      const fromIdx = files.findIndex(
+                        (r) => pathKey(r.path) === pathKey(dragging!.path),
+                      );
+                      if (fromIdx === -1) return;
+                      let to = target;
+                      if (to > fromIdx) to -= 1; // account for removal before insertion
+                      if (to === fromIdx) return; // dropped in place — no-op, no save
+                      const names = files.map((r) => r.name);
+                      const [moved] = names.splice(fromIdx, 1);
+                      names.splice(to, 0, moved);
+                      onReorder(names);
+                    }}
                     onClick={openMenu}
                     onDoubleClick={open(() => view(row))}
-                    className="hover:bg-accent flex cursor-pointer items-center gap-3 border-b px-3 py-2.5 text-sm select-none last:border-b-0"
+                    className="hover:bg-accent relative flex cursor-pointer items-center gap-3 border-b px-3 py-2.5 text-sm select-none last:border-b-0"
                   >
+                    {dropIndex === index && (
+                      <div className="bg-primary pointer-events-none absolute inset-x-0 top-0 z-10 h-0.5" />
+                    )}
+                    {index === files.length - 1 && dropIndex === files.length && (
+                      <div className="bg-primary pointer-events-none absolute inset-x-0 bottom-0 z-10 h-0.5" />
+                    )}
+                    <GripVertical className="text-muted-foreground/40 size-4 shrink-0 cursor-grab" />
                     <FileGlyph name={row.name} className="text-muted-foreground size-5 shrink-0" />
                     <span className="min-w-0 flex-1 truncate">{row.name}</span>
                     <span className="text-muted-foreground w-24 shrink-0 text-right tabular-nums">
@@ -260,6 +336,34 @@ export function FileList({
                     </span>
                     <span className="text-muted-foreground hidden w-28 shrink-0 text-right sm:inline">
                       {row.file ? formatDate(row.file.uploadedAt) : ""}
+                    </span>
+                    <span className="flex w-14 shrink-0 items-center justify-end">
+                      <button
+                        type="button"
+                        aria-label={`Move ${row.name} up`}
+                        disabled={index === 0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          moveRow(index, -1);
+                        }}
+                        onDoubleClick={(e) => e.stopPropagation()}
+                        className="hover:bg-muted flex size-7 items-center justify-center rounded disabled:pointer-events-none disabled:opacity-30"
+                      >
+                        <ChevronUp className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Move ${row.name} down`}
+                        disabled={index === files.length - 1}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          moveRow(index, 1);
+                        }}
+                        onDoubleClick={(e) => e.stopPropagation()}
+                        className="hover:bg-muted flex size-7 items-center justify-center rounded disabled:pointer-events-none disabled:opacity-30"
+                      >
+                        <ChevronDown className="size-4" />
+                      </button>
                     </span>
                   </div>
                 </ContextMenuTrigger>

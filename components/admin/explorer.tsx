@@ -25,6 +25,7 @@ import {
 import type { EntryType } from "@/lib/admin-types";
 import * as actions from "./actions";
 import { useAdminTree } from "./use-admin-tree";
+import { useOrderSaver } from "./use-order-saver";
 import { useUploads } from "./use-uploads";
 import { Tree } from "./tree";
 import { FileList } from "./file-list";
@@ -36,7 +37,8 @@ import { DeleteDialog } from "./delete-dialog";
 
 export function AdminExplorer() {
   const router = useRouter();
-  const { tree, loading, error, refresh } = useAdminTree();
+  const { tree, loading, error, refresh, setOrder } = useAdminTree();
+  const orderSaver = useOrderSaver(refresh);
   const uploads = useUploads(refresh);
   const [cwd, setCwd] = useState<string[]>([]);
   const [sidebarWidth, setSidebarWidth] = useState(256);
@@ -119,6 +121,12 @@ export function AdminExplorer() {
 
   function handleDropEntry(payload: DragPayload, targetDir: string[]) {
     doMove(payload.path, payload.type, targetDir);
+  }
+
+  /** Reorder files in the current directory. `names` is the full visible order. */
+  function handleReorder(names: string[]) {
+    setOrder(cwd, names); // optimistic — rows recompute via directoryContents
+    orderSaver.queueSave(cwd, names);
   }
 
   async function handleCreateFolder(name: string) {
@@ -275,6 +283,9 @@ export function AdminExplorer() {
               <FileList
                 rows={rows}
                 loading={loading}
+                cwd={cwd}
+                dragging={dragging}
+                onReorder={handleReorder}
                 onOpenFolder={setCwd}
                 onDropEntry={handleDropEntry}
                 canDrop={canDropOn}
