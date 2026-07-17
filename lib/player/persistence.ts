@@ -10,7 +10,10 @@ import {
 
 const POS_KEY = "audio.positions";
 const SPEED_KEY = "audio.speed";
+const LOOP_KEY = "audio.loops";
+const MARKERS_KEY = "audio.markers";
 const POS_CAP = 200;
+const MAX_MARKERS = 30;
 
 export const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2] as const;
 
@@ -43,4 +46,44 @@ export function loadSpeed(): number {
 
 export function saveSpeed(s: number): void {
   writeValue(SPEED_KEY, s);
+}
+
+// A/B loop — persisted per track, restored disarmed (see player store).
+interface StoredLoop extends Stamped {
+  a: number;
+  b: number;
+}
+
+export function loadLoop(pathKey: string): { a: number; b: number } | null {
+  const e = readMapEntry<StoredLoop>(LOOP_KEY, pathKey);
+  return e && typeof e.a === "number" && typeof e.b === "number"
+    ? { a: e.a, b: e.b }
+    : null;
+}
+
+export function saveLoop(pathKey: string, a: number, b: number): void {
+  writeMapEntry<StoredLoop>(LOOP_KEY, pathKey, { a, b, at: Date.now() }, 100);
+}
+
+export function clearLoopStored(pathKey: string): void {
+  deleteMapEntry(LOOP_KEY, pathKey);
+}
+
+// Named practice markers.
+export interface Marker {
+  t: number;
+  label: string;
+}
+interface StoredMarkers extends Stamped {
+  list: Marker[];
+}
+
+export function loadMarkers(pathKey: string): Marker[] {
+  const e = readMapEntry<StoredMarkers>(MARKERS_KEY, pathKey);
+  return Array.isArray(e?.list) ? e.list : [];
+}
+
+export function saveMarkers(pathKey: string, list: Marker[]): void {
+  const trimmed = [...list].sort((a, b) => a.t - b.t).slice(0, MAX_MARKERS);
+  writeMapEntry<StoredMarkers>(MARKERS_KEY, pathKey, { list: trimmed, at: Date.now() }, 200);
 }

@@ -1,8 +1,9 @@
 // Docked mini-player: keeps playback controllable while browsing. Hidden when
 // nothing is loaded or when the visitor is already on the active track's page.
 // The progress hairline updates via a ref (no per-frame React render).
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "../icons";
+import { NowPlaying } from "./now-playing";
 import { usePlayerState } from "@/lib/player/use-player";
 import {
   getState,
@@ -11,8 +12,8 @@ import {
   subscribeTime,
   toggle,
 } from "@/lib/player/player-store";
-import { useCurrentPath, useShallowNav } from "@/hooks/use-shallow-nav";
-import { hrefForPath, pathKey } from "@/lib/paths";
+import { useCurrentPath } from "@/hooks/use-shallow-nav";
+import { pathKey } from "@/lib/paths";
 
 function ProgressHairline() {
   const ref = useRef<HTMLDivElement>(null);
@@ -40,8 +41,8 @@ function ProgressHairline() {
 
 export function MiniPlayer() {
   const st = usePlayerState();
-  const navigate = useShallowNav();
   const currentPath = useCurrentPath();
+  const [npOpen, setNpOpen] = useState(false);
 
   if (!st.track || st.status === "idle") return null;
   if (pathKey(currentPath) === st.track.pathKey) return null; // on the track's own page
@@ -53,11 +54,12 @@ export function MiniPlayer() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur-sm"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
+      <NowPlaying open={npOpen} onOpenChange={setNpOpen} />
       <div className="relative mx-auto flex max-w-[1080px] items-center gap-3 px-4 py-2.5">
         <ProgressHairline />
         <button
           type="button"
-          onClick={() => navigate(hrefForPath(st.track!.path))}
+          onClick={() => setNpOpen(true)}
           className="flex min-w-0 flex-1 items-center gap-3 text-left"
         >
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-tile-audio-bg text-tile-audio-fg">

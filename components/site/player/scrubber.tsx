@@ -3,7 +3,7 @@
 // real seek happens on release. `touch-action:none` + pointer capture keep the
 // drag from turning into a page scroll in standalone PWAs.
 import { useRef } from "react";
-import { seekTo, setScrubbing } from "@/lib/player/player-store";
+import { seekTo, setScrubbing, type LoopRegion, type Marker } from "@/lib/player/player-store";
 
 function clamp01(n: number): number {
   return Math.min(1, Math.max(0, n));
@@ -13,10 +13,14 @@ export function Scrubber({
   position,
   duration,
   buffered,
+  loop,
+  markers,
 }: {
   position: number;
   duration: number;
   buffered: number;
+  loop?: LoopRegion | null;
+  markers?: Marker[];
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
@@ -61,10 +65,28 @@ export function Scrubber({
           className="absolute inset-y-0 left-0 rounded-full bg-brand/25"
           style={{ width: `${bufFrac * 100}%` }}
         />
+        {loop && duration > 0 && (
+          <div
+            className="absolute inset-y-0 rounded-full bg-brand/30"
+            style={{
+              left: `${clamp01(loop.a / duration) * 100}%`,
+              width: `${clamp01((loop.b - loop.a) / duration) * 100}%`,
+            }}
+          />
+        )}
         <div
           className="absolute inset-y-0 left-0 rounded-full bg-brand"
           style={{ width: `${frac * 100}%` }}
         />
+        {markers &&
+          duration > 0 &&
+          markers.map((m, i) => (
+            <div
+              key={`${m.t}-${i}`}
+              className="absolute top-1/2 h-[10px] w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink/50"
+              style={{ left: `${clamp01(m.t / duration) * 100}%` }}
+            />
+          ))}
         <div
           className="absolute top-1/2 h-[14px] w-[14px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand shadow-[0_1px_4px_rgba(0,0,0,0.3)]"
           style={{ left: `${frac * 100}%` }}

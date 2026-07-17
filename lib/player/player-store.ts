@@ -10,13 +10,21 @@ import {
   setupMediaSession,
 } from "./media-session";
 import {
+  clearLoopStored,
   clearPosition,
+  loadLoop,
+  loadMarkers,
   loadPosition,
   loadSpeed,
   savePosition,
+  saveLoop,
+  saveMarkers,
   saveSpeed,
+  type Marker,
 } from "./persistence";
 import type { TrackRef } from "./queue";
+
+export type { Marker };
 
 export type PlayerStatus =
   | "idle"
@@ -41,6 +49,7 @@ export interface PlayerState {
   queue: TrackRef[];
   queueIndex: number;
   loop: LoopRegion | null;
+  markers: Marker[];
   errorMessage: string | null;
 }
 
@@ -58,6 +67,7 @@ export const INITIAL_STATE: PlayerState = {
   queue: [],
   queueIndex: -1,
   loop: null,
+  markers: [],
   errorMessage: null,
 };
 
@@ -253,13 +263,16 @@ export function playTrack(track: TrackRef, opts: PlayOptions = {}): void {
   const seek = opts.seekTo ?? loadPosition(track.pathKey) ?? 0;
   intendToPlay = true;
 
+  // Restore a saved loop DISARMED (a one-tap re-arm chip), plus saved markers.
+  const savedLoop = loadLoop(track.pathKey);
   setState({
     track,
     queue,
     queueIndex: queueIndex >= 0 ? queueIndex : 0,
     status: "loading",
     duration: 0,
-    loop: null,
+    loop: savedLoop ? { ...savedLoop, enabled: false } : null,
+    markers: loadMarkers(track.pathKey),
     errorMessage: null,
   });
   setTime({ position: seek, buffered: 0, scrubbing: false });
@@ -375,16 +388,54 @@ function advance(): void {
 
 export function setLoopPoint(which: "a" | "b"): void {
   const a = el;
-  if (!a) return;
+  if (!a || !state.track) return;
   const t = a.currentTime;
   const cur = state.loop ?? { a: 0, b: state.duration, enabled: false };
   const nextLoop: LoopRegion = which === "a" ? { ...cur, a: t } : { ...cur, b: t };
   if (nextLoop.b - nextLoop.a < 1) return; // enforce a minimum span
+  saveLoop(state.track.pathKey, nextLoop.a, nextLoop.b);
   setState({ loop: { ...nextLoop, enabled: true } });
 }
 
+export function setLoopEnabled(enabled: boolean): void {
+  if (!state.loop) return;
+  setState({ loop: { ...state.loop, enabled } });
+}
+
 export function clearLoop(): void {
+  if (state.track) clearLoopStored(state.track.pathKey);
   setState({ loop: null });
+}
+
+export function addMarker(label?: string): void {
+  const a = el;
+  if (!a || !state.track) return;
+  const marker: Marker = {
+    t: a.currentTime,
+    label: label ?? `Marker ${state.markers.length + 1}`,
+  };
+  const markers = [...state.markers, marker].sort((x, y) => x.t - y.t);
+  saveMarkers(state.track.pathKey, markers);
+  setState({ markers });
+}
+
+export function updateMarker(index: number, label: string): void {
+  if (!state.track || !state.markers[index]) return;
+  const markers = state.markers.map((m, i) => (i === index ? { ...m, label } : m));
+  saveMarkers(state.track.pathKey, markers);
+  setState({ markers });
+}
+
+export function removeMarker(index: number): void {
+  if (!state.track) return;
+  const markers = state.markers.filter((_, i) => i !== index);
+  saveMarkers(state.track.pathKey, markers);
+  setState({ markers });
+}
+
+export function jumpToMarker(index: number): void {
+  const m = state.markers[index];
+  if (m) seekTo(m.t);
 }
 
 // ---- lifecycle flush -------------------------------------------------------
