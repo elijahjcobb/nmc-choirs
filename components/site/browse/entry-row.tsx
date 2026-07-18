@@ -32,6 +32,8 @@ export function EntryRow({
   const visual = visualFor(node);
   const [menuOpen, setMenuOpen] = useState(false);
   const longPress = useRef<number | undefined>(undefined);
+  // Files show just their name; folders show item count; search passes a path.
+  const sub = subtitle ?? (node.type === "folder" ? metaFor(node) : null);
 
   const open = () => {
     if (node.type === "file" && kindOf(node.ext) === "audio") {
@@ -68,9 +70,9 @@ export function EntryRow({
           <span className="block truncate text-[14.5px] font-semibold text-ink">
             {displayName(node)}
           </span>
-          <span className="mt-0.5 block truncate text-xs text-subtle">
-            {subtitle ?? metaFor(node)}
-          </span>
+          {sub && (
+            <span className="mt-0.5 block truncate text-xs text-subtle">{sub}</span>
+          )}
         </span>
       </button>
       <button

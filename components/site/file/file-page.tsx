@@ -53,33 +53,23 @@ export function FilePage({
       </div>
 
       <div className="flex flex-col gap-5 px-[clamp(16px,3vw,32px)] pb-[clamp(16px,3vw,32px)]">
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex items-start gap-4">
           <span
             className={`flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-[20px] ${visual.tile}`}
           >
             <Icon name={visual.icon} size={40} filled />
           </span>
-          <h1 className="min-w-[180px] flex-1 text-[clamp(20px,2.6vw,26px)] font-bold leading-[1.25] tracking-[-0.01em] text-ink text-pretty">
+          <h1 className="min-w-0 flex-1 pt-1 text-[clamp(20px,2.6vw,26px)] font-bold leading-[1.25] tracking-[-0.01em] text-ink text-pretty">
             {displayName(file)}
           </h1>
-          <div className="flex shrink-0 gap-2.5">
-            <a
-              href={file.downloadUrl}
-              download
-              className="flex items-center justify-center gap-2 rounded-[13px] bg-brand px-5 py-3 text-[14.5px] font-semibold text-brand-ink transition-opacity hover:opacity-90"
-            >
-              <Icon name="download" size={20} />
-              Download
-            </a>
-            <button
-              type="button"
-              onClick={() => setShareOpen(true)}
-              className="flex items-center justify-center gap-2 rounded-[13px] border-[1.5px] border-line-strong px-5 py-3 text-[14.5px] font-semibold text-ink transition-colors hover:border-brand"
-            >
-              <Icon name="share" size={19} />
-              Share
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setShareOpen(true)}
+            aria-label="Options"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line-strong text-ink transition-colors hover:border-brand"
+          >
+            <Icon name="more_vert" size={22} />
+          </button>
         </div>
 
         <FileViewer file={file} path={path} />
