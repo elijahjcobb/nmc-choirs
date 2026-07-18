@@ -13,9 +13,33 @@ export const ALLOWED_EXTENSIONS = [
   "mov",
   "pdf",
   "txt",
+  "md",
 ] as const;
 
 export type AllowedExtension = (typeof ALLOWED_EXTENSIONS)[number];
+
+/**
+ * Subset of allowed extensions the PUBLIC site previews. Video (mp4/mov) and any
+ * other legacy content stays uploadable/manageable by the admin but is invisible
+ * to visitors — the public tree builder filters on this list.
+ */
+export const PUBLIC_EXTENSIONS = [
+  "mp3",
+  "wav",
+  "aac",
+  "m4a",
+  "pdf",
+  "txt",
+  "md",
+] as const;
+
+export type PublicExtension = (typeof PUBLIC_EXTENSIONS)[number];
+
+/** True if a filename is one the public site knows how to show. */
+export function isPublicFile(name: string): boolean {
+  const ext = extensionOf(name);
+  return ext !== null && (PUBLIC_EXTENSIONS as readonly string[]).includes(ext);
+}
 
 /** `accept` attribute for <input type="file"> — e.g. ".mp3,.wav,..." */
 export const ACCEPT = ALLOWED_EXTENSIONS.map((e) => "." + e).join(",");

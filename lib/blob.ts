@@ -13,7 +13,6 @@ import {
   BlobNotFoundError,
   type ListBlobResultBlob,
 } from "@vercel/blob";
-import type { APIFile, APIItem } from "../data/dir";
 import {
   compareItems,
   isHiddenName,
@@ -22,8 +21,26 @@ import {
   BLOB_ROOT,
 } from "./files";
 
+// Listing shapes for the admin/data layer. (The public site uses the richer
+// nested LibraryIndex from lib/tree-types.ts instead.)
+export interface APIFile {
+  name: string;
+  mtime: string;
+  type: "file";
+  size: number;
+}
+
+export interface APIDirectory {
+  name: string;
+  mtime: string;
+  type: "directory";
+}
+
+export type APIItem = APIFile | APIDirectory;
+
 export const ROOT = BLOB_ROOT;
 export const KEEP = ".keep";
+/** Per-folder admin ordering manifest: a JSON array of file names, in order. */
 export const ORDER = ".order.json";
 // Blob rejects empty bodies ("body is required"), so the placeholder is 1 byte.
 const KEEP_BODY = "\n";

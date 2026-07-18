@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const deleted = await deleteEntry(path, type);
 
   await revalidate(res, path.slice(0, -1));
-  if (type === "file") await revalidate(res, ["view", ...path]);
+  if (type === "file") await revalidate(res, path);
 
   return res.status(200).json({ deleted });
 }

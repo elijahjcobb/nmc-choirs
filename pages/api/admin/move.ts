@@ -60,8 +60,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   await revalidate(res, fromParent);
   await revalidate(res, toParent);
   if (type === "file") {
-    await revalidate(res, ["view", ...from]);
-    await revalidate(res, ["view", ...to]);
+    await revalidate(res, from);
+    await revalidate(res, to);
   }
 
   return res.status(200).json({ moved });

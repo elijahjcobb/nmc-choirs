@@ -26,15 +26,18 @@ export function RenameDialog({ row, onOpenChange, onRename }: Props) {
     if (row) setName(row.name);
   }, [row]);
 
-  let error = name.length > 0 ? validateEntryName(name) : null;
-  if (!error && row?.type === "file" && name.length > 0 && !isAllowedFile(name)) {
+  // Validate the trimmed name so leading/trailing spaces are silently accepted
+  // (they're trimmed on submit) rather than surfaced as an error.
+  const trimmed = name.trim();
+  let error = trimmed.length > 0 ? validateEntryName(trimmed) : null;
+  if (!error && row?.type === "file" && trimmed.length > 0 && !isAllowedFile(trimmed)) {
     error = "File must keep an allowed extension.";
   }
-  const unchanged = row ? name === row.name : true;
+  const unchanged = row ? trimmed === row.name : true;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!row || error || name.length === 0 || unchanged) return;
+    if (!row || error || trimmed.length === 0 || unchanged) return;
     setBusy(true);
     await onRename(row, name.trim());
     setBusy(false);

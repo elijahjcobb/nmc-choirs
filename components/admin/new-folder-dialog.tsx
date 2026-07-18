@@ -21,7 +21,8 @@ interface Props {
 export function NewFolderDialog({ open, onOpenChange, cwd, onCreate }: Props) {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
-  const error = name.length > 0 ? validateEntryName(name) : null;
+  const trimmed = name.trim();
+  const error = trimmed.length > 0 ? validateEntryName(trimmed) : null;
   const location = cwd.length ? cwd.join(" / ") : "All Files";
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export function NewFolderDialog({ open, onOpenChange, cwd, onCreate }: Props) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (error || name.length === 0) return;
+    if (error || trimmed.length === 0) return;
     setBusy(true);
     await onCreate(name.trim());
     setBusy(false);

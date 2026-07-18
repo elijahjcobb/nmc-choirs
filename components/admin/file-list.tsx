@@ -113,7 +113,8 @@ export function FileList({
   }
 
   function view(row: Row) {
-    window.open("/view" + encodePathForRoute(row.path), "_blank", "noopener");
+    // Public files now live at /<path> (no /view prefix).
+    window.open(encodePathForRoute(row.path), "_blank", "noopener");
   }
   function download(row: Row) {
     if (row.file) window.open(row.file.downloadUrl, "_blank", "noopener");
