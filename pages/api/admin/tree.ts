@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import type { ListBlobResultBlob } from "@vercel/blob";
 import { requireAdmin, requireMethod } from "@/lib/admin-api";
-import { listSubtree, ROOT, KEEP } from "@/lib/blob";
+import { listSubtree, fetchOrder, ROOT, ORDER } from "@/lib/blob";
+import { isHiddenName } from "@/lib/files";
 import type { TreeResponse, TreeFile } from "@/lib/admin-types";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -10,6 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const blobs = await listSubtree(ROOT);
   const files: TreeFile[] = [];
   const folderKeys = new Set<string>();
+  const orderBlobs: { key: string; blob: ListBlobResultBlob }[] = [];
 
   for (const blob of blobs) {
     const rel = blob.pathname.slice(ROOT.length);
@@ -20,7 +23,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       folderKeys.add(JSON.stringify(segments.slice(0, i)));
     }
     const base = segments[segments.length - 1];
-    if (base === KEEP) continue;
+    if (isHiddenName(base)) {
+      // Order file's directory key mirrors the client's pathKey (root = "").
+      if (base === ORDER) orderBlobs.push({ key: segments.slice(0, -1).join("/"), blob });
+      continue;
+    }
     files.push({
       path: segments,
       size: blob.size,
@@ -30,7 +37,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
+  const orders: Record<string, string[]> = {};
+  await Promise.all(
+    orderBlobs.map(async ({ key, blob }) => {
+      const parsed = await fetchOrder(blob);
+      if (parsed) orders[key] = parsed;
+    }),
+  );
+
   const folders = Array.from(folderKeys, (s) => JSON.parse(s) as string[]);
-  const body: TreeResponse = { files, folders };
+  const body: TreeResponse = { files, folders, orders };
   res.status(200).json(body);
 }

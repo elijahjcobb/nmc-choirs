@@ -85,11 +85,57 @@ export interface SortableItem {
   name: string;
 }
 
+/** Natural (numeric, case-insensitive) comparison of two names. */
+export function compareNames(a: string, b: string): number {
+  return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
+}
+
 /** Directories first, then natural (numeric, case-insensitive) name order. */
 export function compareItems(a: SortableItem, b: SortableItem): number {
   if (a.type !== b.type) return a.type === "directory" ? -1 : 1;
-  return a.name.localeCompare(b.name, undefined, {
-    numeric: true,
-    sensitivity: "base",
+  return compareNames(a.name, b.name);
+}
+
+/** Hidden metadata basenames (".keep", ".order.json", any dot-prefixed name). */
+export function isHiddenName(name: string): boolean {
+  return name.startsWith(".");
+}
+
+/**
+ * Apply a manual file order. Files whose names appear in `order` keep that
+ * relative order (first occurrence wins); order entries with no matching file
+ * are ignored; files absent from `order` are appended at the end, sorted
+ * alphabetically among themselves. Pass null for "no order file" (pure alpha).
+ */
+export function sortFilesWithOrder<T extends { name: string }>(
+  files: readonly T[],
+  order: readonly string[] | null,
+): T[] {
+  if (!order || order.length === 0) {
+    return [...files].sort((a, b) => compareNames(a.name, b.name));
+  }
+  const rank = new Map<string, number>();
+  order.forEach((name, i) => {
+    if (!rank.has(name)) rank.set(name, i);
   });
+  const ordered: T[] = [];
+  const rest: T[] = [];
+  for (const file of files) {
+    (rank.has(file.name) ? ordered : rest).push(file);
+  }
+  ordered.sort((a, b) => rank.get(a.name)! - rank.get(b.name)!);
+  rest.sort((a, b) => compareNames(a.name, b.name));
+  return [...ordered, ...rest];
+}
+
+/** Defensive parse of an `.order.json` body. Null on any structural problem. */
+export function parseOrderJson(text: string): string[] | null {
+  try {
+    const parsed: unknown = JSON.parse(text);
+    if (!Array.isArray(parsed)) return null;
+    if (!parsed.every((n): n is string => typeof n === "string")) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
 }

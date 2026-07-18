@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { toast } from "sonner";
 import { FolderPlus, Upload, LogOut, X } from "lucide-react";
@@ -25,6 +25,7 @@ import {
 import type { EntryType } from "@/lib/admin-types";
 import * as actions from "./actions";
 import { useAdminTree } from "./use-admin-tree";
+import { useOrderSaver } from "./use-order-saver";
 import { useUploads } from "./use-uploads";
 import { Tree } from "./tree";
 import { FileList } from "./file-list";
@@ -34,14 +35,60 @@ import { RenameDialog } from "./rename-dialog";
 import { MoveDialog } from "./move-dialog";
 import { DeleteDialog } from "./delete-dialog";
 
+/** Parse the current folder out of the `?path=` query value. */
+function parsePath(q: string | string[] | undefined): string[] {
+  const raw = Array.isArray(q) ? q[0] : q;
+  return raw ? raw.split("/").filter(Boolean) : [];
+}
+
 export function AdminExplorer() {
   const router = useRouter();
-  const { tree, loading, error, refresh } = useAdminTree();
+  const { tree, loading, error, refresh, setOrder } = useAdminTree();
+  const orderSaver = useOrderSaver(refresh);
   const uploads = useUploads(refresh);
-  const [cwd, setCwd] = useState<string[]>([]);
+  // The current folder lives in `?path=` so a refresh (and back/forward) keeps
+  // us where we are. Names never contain "/", so join/split is unambiguous.
+  const queryPath = router.query.path;
+
+  // Seed cwd from the URL on the first render so a deep link / refresh lands in
+  // the right folder with no flash of root. /admin uses getServerSideProps, so
+  // router.query is populated on the very first (server and client) render.
+  const [cwd, setCwd] = useState<string[]>(() => parsePath(router.query.path));
   const [sidebarWidth, setSidebarWidth] = useState(256);
   const [dragging, setDragging] = useState<DragPayload | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  // A cwd change that originated FROM the URL must not be echoed back to it.
+  // Seeded true so the mount-time write (cwd already matches the URL) is skipped.
+  const skipUrlWrite = useRef(true);
+
+  // URL -> cwd (browser back/forward). Our own replace() lands here too, but the
+  // equality guard makes it a no-op; only genuine history changes move us.
+  useEffect(() => {
+    if (!router.isReady) return;
+    const next = parsePath(queryPath);
+    setCwd((cur) => {
+      if (pathKey(cur) === pathKey(next)) return cur;
+      skipUrlWrite.current = true; // came from the URL — don't write it back
+      return next;
+    });
+  }, [router.isReady, queryPath]);
+
+  // cwd -> URL (folder navigation), shallow so getServerSideProps doesn't re-run.
+  useEffect(() => {
+    if (skipUrlWrite.current) {
+      skipUrlWrite.current = false;
+      return;
+    }
+    const nextStr = cwd.join("/");
+    router.replace(
+      { pathname: "/admin", query: nextStr ? { path: nextStr } : {} },
+      undefined,
+      { shallow: true },
+    );
+    // router intentionally omitted: it changes identity on each query update and
+    // would re-run this effect needlessly. skipUrlWrite guards the echo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cwd]);
 
   // Whether the currently-dragged entry may be dropped on `targetDir`. Invalid
   // targets (its current parent, itself, or a descendant) don't highlight and
@@ -119,6 +166,12 @@ export function AdminExplorer() {
 
   function handleDropEntry(payload: DragPayload, targetDir: string[]) {
     doMove(payload.path, payload.type, targetDir);
+  }
+
+  /** Reorder files in the current directory. `names` is the full visible order. */
+  function handleReorder(names: string[]) {
+    setOrder(cwd, names); // optimistic — rows recompute via directoryContents
+    orderSaver.queueSave(cwd, names);
   }
 
   async function handleCreateFolder(name: string) {
@@ -275,6 +328,9 @@ export function AdminExplorer() {
               <FileList
                 rows={rows}
                 loading={loading}
+                cwd={cwd}
+                dragging={dragging}
+                onReorder={handleReorder}
                 onOpenFolder={setCwd}
                 onDropEntry={handleDropEntry}
                 canDrop={canDropOn}

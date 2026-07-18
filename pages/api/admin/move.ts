@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 import { requireAdmin, requireMethod, revalidate } from "@/lib/admin-api";
-import { listDir, moveEntry, fileExists, dirExists } from "@/lib/blob";
+import { listDir, moveEntry, fileExists, dirExists, renameInOrder } from "@/lib/blob";
 import { validateEntryName } from "@/lib/files";
 
 const bodySchema = z.object({
@@ -47,7 +47,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const moved = await moveEntry(from, to, type);
 
-  await revalidate(res, from.slice(0, -1));
+  const fromParent = from.slice(0, -1);
+  // A same-directory file rename keeps its slot in the order file (best-effort).
+  if (
+    type === "file" &&
+    fromParent.length === toParent.length &&
+    fromParent.every((s, i) => s === toParent[i])
+  ) {
+    await renameInOrder(toParent, from[from.length - 1], toName);
+  }
+
+  await revalidate(res, fromParent);
   await revalidate(res, toParent);
   if (type === "file") {
     await revalidate(res, from);

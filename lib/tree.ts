@@ -4,12 +4,11 @@
 // created, so empty folders and folders holding only non-public files (mp4/mov,
 // stray .keep/.order.json placeholders) never appear.
 //
-// Ordering: each folder may contain a `.order.json` (array of child names, admin
-// order). Those are fetched and applied here; folders without one fall back to
-// natural sort. The client is order-blind — it consumes children as delivered.
-import { listSubtree, ROOT, KEEP, ORDER_FILE } from "./blob";
-import { extensionOf, isPublicFile } from "./files";
-import { orderChildren } from "./order";
+// Ordering: each folder may hold a `.order.json` (admin file order). Folders are
+// always alphabetical; files honour the order file (see sortFilesWithOrder),
+// matching the admin's own listDir. The client consumes children as delivered.
+import { listSubtree, ROOT, KEEP, ORDER, fetchOrder } from "./blob";
+import { compareNames, extensionOf, isPublicFile, sortFilesWithOrder } from "./files";
 import { pathKey } from "./paths";
 import type {
   LibraryIndex,
@@ -26,11 +25,16 @@ interface MutableFolder {
 }
 type MutableNode = MutableFolder | (TreeFileNode & { kind: "file" });
 
+interface OrderBlobRef {
+  url: string;
+  uploadedAt: Date;
+}
+
 export async function buildLibraryIndex(): Promise<LibraryIndex> {
   const blobs = await listSubtree(ROOT);
   const root: MutableFolder = { kind: "folder", name: "", children: new Map() };
-  // folder pathKey -> URL of that folder's .order.json (if any)
-  const orderUrls = new Map<string, string>();
+  // folder pathKey -> its .order.json blob (for cache-busted fetch)
+  const orderBlobs = new Map<string, OrderBlobRef>();
 
   for (const blob of blobs) {
     const rel = blob.pathname.slice(ROOT.length);
@@ -38,8 +42,8 @@ export async function buildLibraryIndex(): Promise<LibraryIndex> {
     const segments = rel.split("/");
     const base = segments[segments.length - 1];
 
-    if (base === ORDER_FILE) {
-      orderUrls.set(pathKey(segments.slice(0, -1)), blob.url);
+    if (base === ORDER) {
+      orderBlobs.set(pathKey(segments.slice(0, -1)), blob);
       continue;
     }
     if (base === KEEP || !isPublicFile(base)) continue;
@@ -69,30 +73,16 @@ export async function buildLibraryIndex(): Promise<LibraryIndex> {
     });
   }
 
-  const orders = await fetchOrders(orderUrls);
-  const rootNode = finalizeFolder(root, [], orders);
-  return { v: 1, generatedAt: new Date().toISOString(), root: rootNode };
-}
-
-async function fetchOrders(
-  urls: Map<string, string>,
-): Promise<Map<string, string[]>> {
   const orders = new Map<string, string[]>();
   await Promise.all(
-    [...urls].map(async ([key, url]) => {
-      try {
-        const res = await fetch(url, { cache: "no-store" });
-        if (!res.ok) return;
-        const arr = await res.json();
-        if (Array.isArray(arr)) {
-          orders.set(key, arr.filter((x): x is string => typeof x === "string"));
-        }
-      } catch {
-        /* ignore a malformed/missing order file */
-      }
+    [...orderBlobs].map(async ([key, blob]) => {
+      const order = await fetchOrder(blob);
+      if (order) orders.set(key, order);
     }),
   );
-  return orders;
+
+  const rootNode = finalizeFolder(root, [], orders);
+  return { v: 1, generatedAt: new Date().toISOString(), root: rootNode };
 }
 
 function finalizeFolder(
@@ -100,15 +90,18 @@ function finalizeFolder(
   path: string[],
   orders: Map<string, string[]>,
 ): TreeFolderNode {
-  const children: TreeNode[] = [];
+  const folders: TreeFolderNode[] = [];
+  const files: TreeFileNode[] = [];
   for (const child of folder.children.values()) {
     if (child.kind === "folder") {
-      children.push(finalizeFolder(child, [...path, child.name], orders));
+      folders.push(finalizeFolder(child, [...path, child.name], orders));
     } else {
       const { kind: _kind, ...fileNode } = child;
-      children.push(fileNode);
+      files.push(fileNode);
     }
   }
-  const order = orders.get(pathKey(path)) ?? null;
-  return { type: "folder", name: folder.name, children: orderChildren(order, children) };
+  folders.sort((a, b) => compareNames(a.name, b.name));
+  const orderedFiles = sortFilesWithOrder(files, orders.get(pathKey(path)) ?? null);
+  const children: TreeNode[] = [...folders, ...orderedFiles];
+  return { type: "folder", name: folder.name, children };
 }
