@@ -2,21 +2,11 @@
 import { useViewMode } from "@/hooks/use-view-mode";
 import { Icon } from "../icons";
 
-type DocumentWithVT = Document & { startViewTransition?: (cb: () => void) => unknown };
-
 export function ViewToggle() {
   const [mode, setMode] = useViewMode();
   const next = mode === "grid" ? "list" : "grid";
 
-  const toggle = () => {
-    const run = () => setMode(next);
-    const doc = typeof document !== "undefined" ? (document as DocumentWithVT) : null;
-    const reduce =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (doc?.startViewTransition && !reduce) doc.startViewTransition(run);
-    else run();
-  };
+  const toggle = () => setMode(next);
 
   return (
     <button

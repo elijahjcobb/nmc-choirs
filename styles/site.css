@@ -142,6 +142,8 @@
   font-family: var(--font-site), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Kill the gray tap-flash on iOS when tapping rows/buttons. */
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Anchors default to inheriting color. Placed in @layer base so Tailwind text-*
