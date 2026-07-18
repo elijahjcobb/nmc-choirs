@@ -98,11 +98,9 @@ export function PitchPipe({
                     onPointerUp={up}
                     onPointerCancel={up}
                     onPointerLeave={() => held.current === midi && up()}
-                    className={`select-none rounded-xl border py-3 text-[13px] font-semibold transition-colors ${
-                      sharp
-                        ? "border-line bg-nav-hover text-subtle"
-                        : "border-line-strong bg-surface text-ink"
-                    } active:border-brand active:bg-brand active:text-brand-ink`}
+                    className={`select-none rounded-xl border py-3 text-[13px] font-semibold text-ink shadow-sm transition-all hover:border-brand active:scale-95 active:border-brand active:bg-brand active:text-brand-ink ${
+                      sharp ? "border-line bg-ink/[0.06]" : "border-line-strong bg-surface"
+                    }`}
                     style={{ touchAction: "none" }}
                   >
                     {name}

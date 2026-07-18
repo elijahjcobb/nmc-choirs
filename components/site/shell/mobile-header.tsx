@@ -2,12 +2,13 @@
 // file pages render their own back bar instead.
 import { useSite } from "../site-context";
 import { Icon } from "../icons";
+import { PineLogo } from "./pine-logo";
 
 export function MobileHeader() {
   const { query, setQuery, navigate } = useSite();
   return (
     <div
-      className="flex flex-col gap-3 px-5 pt-3.5 md:hidden"
+      className="sticky top-0 z-20 flex flex-col gap-3 bg-canvas/85 px-5 pb-2 backdrop-blur-sm md:hidden"
       style={{ paddingTop: "calc(14px + env(safe-area-inset-top))" }}
     >
       <button
@@ -16,8 +17,7 @@ export function MobileHeader() {
         className="flex items-center gap-[11px] text-left"
       >
         <span className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[11px] bg-brand">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/pine-white.png" alt="" className="h-[23px] w-auto" />
+          <PineLogo height={23} />
         </span>
         <span className="text-[19px] font-bold text-ink">NMC Music</span>
       </button>

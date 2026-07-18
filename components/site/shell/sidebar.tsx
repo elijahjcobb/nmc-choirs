@@ -2,6 +2,7 @@
 // the 760px breakpoint (the mobile header takes over).
 import { useSite } from "../site-context";
 import { Icon } from "../icons";
+import { PineLogo } from "./pine-logo";
 import type { IconName } from "../icons";
 import { hrefForPath } from "@/lib/paths";
 import { cn } from "@/lib/utils";
@@ -46,8 +47,7 @@ export function Sidebar() {
           className="flex items-center gap-[11px] px-1.5 text-left"
         >
           <span className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[11px] bg-brand">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/pine-white.png" alt="" className="h-[23px] w-auto" />
+            <PineLogo height={23} />
           </span>
           <span className="text-[17px] font-bold text-ink">NMC Music</span>
         </button>

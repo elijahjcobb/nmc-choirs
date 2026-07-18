@@ -68,10 +68,7 @@ export function ShareMenu({
         <Item icon="share" label="Share…" onClick={() => { void shareLink(url, name); close(); }} />
         <Item icon="link" label="Copy link" onClick={() => { void copyLink(url); close(); }} />
         {node.type === "file" && (
-          <>
-            <Item icon="download" label="Download" href={node.downloadUrl} download onClick={close} />
-            <Item icon="open_in_new" label="Open original" href={node.url} onClick={close} />
-          </>
+          <Item icon="download" label="Download" href={node.downloadUrl} download onClick={close} />
         )}
       </div>
     </Sheet>

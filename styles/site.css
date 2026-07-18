@@ -144,12 +144,14 @@
   text-rendering: optimizeLegibility;
 }
 
-/* Anchors default to inheriting color so Tailwind text-* utilities win on links
-   styled as buttons. Content links (markdown/text) opt into the link color via
-   the `.prose-nmc` scope. */
-.site-root a {
-  color: inherit;
-  text-decoration: none;
+/* Anchors default to inheriting color. Placed in @layer base so Tailwind text-*
+   utilities (utilities layer) always win on links styled as buttons — e.g. the
+   white Download label. Content links opt into the link color via `.prose-nmc`. */
+@layer base {
+  .site-root a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 .site-root .prose-nmc a {
   color: var(--link);
@@ -241,6 +243,15 @@
 
 /* Material Symbols Rounded are vendored as inline SVG (components/site/icons.tsx),
    so no icon webfont is loaded and there is no FOUT. */
+
+/* Hide scrollbars (used by horizontally-scrolling breadcrumbs). */
+.nmc-noscrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.nmc-noscrollbar::-webkit-scrollbar {
+  display: none;
+}
 
 @keyframes nmc-eq {
   0%,

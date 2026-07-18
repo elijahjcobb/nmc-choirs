@@ -110,23 +110,26 @@ export default function PdfViewer({ file, path }: { file: TreeFileNode; path: st
     <div className="relative">
       <div
         ref={scrollRef}
-        className="flex max-h-[80vh] flex-col items-center gap-3 overflow-y-auto rounded-[18px] border border-line bg-canvas p-[clamp(10px,2vw,20px)]"
+        className="flex max-h-[85vh] flex-col items-center gap-3 overflow-y-auto rounded-[18px] border border-line bg-canvas p-[clamp(10px,2vw,20px)]"
       >
         {!doc ? (
           <div
-            className="w-full max-w-[900px] animate-pulse rounded-[4px] bg-line"
+            className="w-full animate-pulse rounded-[4px] bg-line"
             style={{ aspectRatio: "1 / 1.294" }}
           />
         ) : (
           pages.map((p) => (
-            <div key={p} className="w-full max-w-[900px]">
+            <div key={p} className="w-full">
               <PdfPage doc={doc} pageNumber={p} width={width} onVisible={onVisible} />
             </div>
           ))
         )}
       </div>
       {doc && (
-        <div className="pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-toast-bg/90 px-3 py-1.5 text-[11.5px] font-medium text-[color:var(--toast-ink)] shadow-lg">
+        <div
+          className="pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full px-3.5 py-2 text-[12px] font-semibold shadow-lg"
+          style={{ background: "var(--toast-bg)", color: "var(--toast-ink)" }}
+        >
           <Icon name="picture_as_pdf" size={14} />
           {current} / {doc.numPages}
         </div>

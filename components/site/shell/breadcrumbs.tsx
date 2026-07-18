@@ -30,18 +30,18 @@ export function Breadcrumbs({ trailingLabel }: { trailingLabel?: string }) {
   if (trailingLabel) crumbs.push({ label: trailingLabel, active: true });
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="nmc-noscrollbar flex items-center gap-2 overflow-x-auto">
       {crumbs.map((crumb, i) => (
-        <div key={crumb.href ?? crumb.label} className="flex items-center gap-2">
+        <div key={crumb.href ?? crumb.label} className="flex shrink-0 items-center gap-2">
           {i > 0 && (
-            <Icon name="chevron_right" size={16} className="text-faint" />
+            <Icon name="chevron_right" size={16} className="shrink-0 text-faint" />
           )}
           <button
             type="button"
             disabled={!crumb.href}
             onClick={() => crumb.href && navigate(crumb.href)}
             className={cn(
-              "flex items-center gap-1.5 rounded-full px-[13px] py-1.5 text-[12.5px] transition-colors",
+              "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-[13px] py-1.5 text-[12.5px] transition-colors",
               crumb.active
                 ? "border border-line-strong bg-surface font-semibold text-ink"
                 : "font-medium text-subtle hover:text-brand",

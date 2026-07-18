@@ -24,7 +24,6 @@ import {
 } from "@/lib/player/player-store";
 import { SPEEDS } from "@/lib/player/persistence";
 import { formatDuration } from "@/lib/paths";
-import { fileUrl, shareLink } from "@/lib/share";
 
 function speedLabel(s: number): string {
   return `${s % 1 === 0 ? s.toFixed(1) : s}×`;
@@ -63,8 +62,6 @@ export function PlayerControls({ artSize = "min(300px,64vw)" }: { artSize?: stri
         <span style={{ color: "rgba(255,255,255,0.92)" }} className="relative">
           <Icon name="music_note" size={96} filled />
         </span>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/pine-white.png" alt="" className="absolute bottom-3 right-4 h-[26px] w-auto opacity-55" />
         {playing && (
           <div className="absolute bottom-3.5 left-4 flex h-6 items-end gap-1">
             {[0, 0.25, 0.5].map((d) => (
@@ -121,19 +118,6 @@ export function PlayerControls({ artSize = "min(300px,64vw)" }: { artSize?: stri
         <button type="button" onClick={() => setPitchOpen(true)} className={secondaryBtn}>
           <Icon name="tune" size={16} />
           Pitch
-        </button>
-        <button
-          type="button"
-          onClick={() =>
-            void shareLink(
-              fileUrl(st.track!.path, { t: Math.floor(tm.position) }),
-              st.track!.name,
-            )
-          }
-          className={secondaryBtn}
-        >
-          <Icon name="share" size={16} />
-          Share
         </button>
       </div>
 

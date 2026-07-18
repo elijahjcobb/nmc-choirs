@@ -256,6 +256,24 @@ export interface PlayOptions {
 
 export function playTrack(track: TrackRef, opts: PlayOptions = {}): void {
   const a = audio();
+
+  // Re-selecting the track that's already loaded and playing (e.g. tapping its
+  // row again while navigating back to it) must NOT reload/seek/reset status —
+  // that stalls playback (the `playing` event won't re-fire). Just refresh the
+  // queue reference and keep going.
+  const isCurrent = a.currentSrc === track.url || a.src === track.url;
+  if (isCurrent && !a.paused && !a.ended && opts.seekTo == null) {
+    const q = opts.queue && opts.queue.length ? opts.queue : state.queue;
+    const qi = q.findIndex((t) => t.pathKey === track.pathKey);
+    setState({
+      track,
+      queue: q,
+      queueIndex: qi >= 0 ? qi : state.queueIndex,
+      status: "playing",
+    });
+    return;
+  }
+
   flushPosition();
 
   const queue = opts.queue && opts.queue.length ? opts.queue : [track];
